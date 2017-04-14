@@ -12,4 +12,5 @@ output/
 ubergmann_SGAN/
 ulyanov_TextureNets/
 VGG/
-data/
+data/*.npy
+data/.floyddata
