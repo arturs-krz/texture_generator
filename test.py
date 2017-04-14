@@ -55,7 +55,7 @@ with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session() as sess:
         
-        img1 = utils.load_image("pebbles_small.jpg")
+        img1 = utils.load_image("data/pebbles_small.jpg")
         batch1 = img1.reshape((1, 224, 224, 3))
         # batch = np.concatenate((batch1, batch2), 0)
         images = tf.placeholder("float", [1, 224, 224, 3])
@@ -137,7 +137,7 @@ with tf.device('/gpu:0'):
           
         img = generator.result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
-        img.save('/output/result.bmp')
+        img.save('output/result.bmp')
         # img.show()
           
           # ------
