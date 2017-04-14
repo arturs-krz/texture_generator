@@ -1,0 +1,14 @@
+.DS_Store
+.floydexpt
+.floydignore
+floyd_requirements.txt
+mnist_conv.py
+mnist_conv2.py
+__pycache__/
+gatys_DeepTextures/
+input/
+NeuralStylePainting/
+output/
+ubergmann_SGAN/
+ulyanov_TextureNets/
+VGG/
