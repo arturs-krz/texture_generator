@@ -51,6 +51,7 @@ def get_loss(reference, generated):
     
 
 # with tf.Session(config=tf.ConfigProto(gpu_options=(tf.GPUOptions(per_process_gpu_memory_fraction=0.7)))) as sess:
+
 with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session() as sess:
@@ -93,28 +94,8 @@ with tf.device('/gpu:0'):
         # loss = get_loss(reference=[gold_1_placeholder], generated=[vgg.conv1_2])
         loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
         print(loss)
-        
 
-        # gen_2_1 = tf.placeholder("float", vgg.conv2_1.get_shape())
-        # gen_5_1 = tf.placeholder("float", vgg.conv5_1.get_shape(), name="gen_5_1")
-
-        # generated = generator.run(sess)
-
-        # loss = get_loss(reference=[gold_2_1, gold_5_1], generated=[gen_2_1, gen_5_1], sess=sess)
-        # loss = layer_loss(sess.run(vgg.conv5_1, feed_dict={images: batch1}), gen_5_1)
-
-        # generated = generator.run(sess)
-        # gen_conv5_1 = sess.run(vgg.conv5_1)
-
-
-        # loss = layer_loss(gold_5_1, gen_5_1)
-        # print(loss.get_shape())
-        
-        # print(loss.eval(session=sess,feed_dict={gold_5_1: gold_conv5_1, gen_5_1: gen_conv5_1}))
-
-        # loss = sum([layer_loss(reference[i], generated[i]) for i in range(len(reference))])
-        # print(loss)
-
+        # alpha - training rate
         alpha = 0.03
         train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
 
@@ -122,19 +103,15 @@ with tf.device('/gpu:0'):
         sess.run(init)
         
         iterations = 10000
-        feed={gold_1_placeholder: gold_conv1_2}
-        # feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
+        # feed={gold_1_placeholder: gold_conv1_2}
+        feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
         for i in range(iterations):
-        #     print("Starting iteration #{}".format(i))
-        #     # generated = generator.run(sess)
-        #     # gen_conv2_1, gen_conv5_1 = sess.run([vgg.conv2_1, vgg.conv5_1], feed_dict={images: generated})
-        #     # gen_conv5_1 = sess.run(vgg.conv5_1, feed_dict={images: generated})
-        #     # print(gen_conv5_1)
 
         #     # feed = {gold_2_1: gold_conv2_1, gold_5_1: gold_conv5_1, gen_2_1: gen_conv2_1, gen_5_1: gen_conv5_1}
             train_step.run(session=sess, feed_dict=feed)
             print("Iteration #{}: loss = {}".format(i, loss.eval(session=sess, feed_dict=feed)))
           
+        # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
         img = generator.result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
