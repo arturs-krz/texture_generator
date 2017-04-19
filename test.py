@@ -80,7 +80,7 @@ with tf.device('/gpu:0'):
         with tf.name_scope('generator'):
             # Starting data - random 4x4 noise (x3 color channels)
             # init_noise = tf.random_normal(shape=[1, 224, 224, 3])
-            init_noise = tf.placeholder("float", shape=[None,224,224,3])
+            init_noise = tf.placeholder("float", shape=[1,224,224,3])
             tf.summary.histogram('Init noise', init_noise)
         
             conv1 = conv(init_noise, 32, 9, 1, activation=None, name='conv1')
@@ -126,7 +126,7 @@ with tf.device('/gpu:0'):
         sess.run(init)
         
         iterations = 250
-        batch_size = 10
+        batch_size = 1
         
         for i in range(iterations):
             batch = np.random.rand(batch_size, 224, 224, 3)
