@@ -99,14 +99,15 @@ with tf.device('/gpu:0'):
             init_noise = tf.placeholder("float", shape=[1,14,14,9])
             tf.summary.histogram('Init noise', init_noise)
 
-            transpose1 = conv_transpose(init_noise, 9, 9, 4, name='gen_transpose1')
-            transpose2 = conv_transpose(transpose1, 3, 9, 2, name='gen_transpose2')
+            transpose1 = conv_transpose(init_noise, 9, 9, 2, name='gen_transpose1')
+            transpose2 = conv_transpose(transpose1, 6, 9, 2, name='gen_transpose2')
             transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
+            transpose4 = conv_transpose(transpose3, 3, 3, 2, name='gen_transpose4')
+            transpose5 = conv_transpose(transpose4, 3, 3, 1, name='gne_transpose5')
 
-            residual1 = residual_conv(transpose3, 9, name='gen_residual1')
-            residual2 = residual_conv(residual1, 3, name='gen_residual2')
+            
 
-            result = tf.nn.tanh(residual2) * 150 + 255./2
+            result = tf.nn.tanh(transpose5) * 150 + 255./2
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -115,8 +116,8 @@ with tf.device('/gpu:0'):
 
         # print(vgg.conv5_1.eval(session=sess))
 
-        # loss = get_loss(reference=[gold_1_placeholder], generated=[vgg.conv1_2])
-        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        loss = get_loss(reference=[gold_3_placeholder], generated=[vgg.conv3_1])
+        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
 
 
         # loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2))
