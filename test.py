@@ -99,17 +99,24 @@ with tf.device('/gpu:0'):
         alpha = 0.03
         train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
 
+        tf.summary.scalar('loss', loss)
+        writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
+
+        summary_op = tf.summary.merge_all()
+
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 10000
+        iterations = 1000
         # feed={gold_1_placeholder: gold_conv1_2}
         feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
         for i in range(iterations):
 
         #     # feed = {gold_2_1: gold_conv2_1, gold_5_1: gold_conv5_1, gen_2_1: gen_conv2_1, gen_5_1: gen_conv5_1}
             train_step.run(session=sess, feed_dict=feed)
-            print("Iteration #{}: loss = {}".format(i, loss.eval(session=sess, feed_dict=feed)))
+            summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
+            writer.add_summary(summary, i)
+            print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
         img = generator.result.eval(session=sess)

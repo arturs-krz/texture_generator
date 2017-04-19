@@ -14,3 +14,4 @@ ulyanov_TextureNets/
 VGG/
 data/*.npy
 data/.floyddata
+.tmp/
