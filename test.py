@@ -106,7 +106,10 @@ with tf.device('/gpu:0'):
             transpose2 = conv_transpose(transpose1, 3, 9, 2, name='transpose2')
             transpose3 = conv_transpose(transpose2, 3, 3, 2, name='transpose3')
 
-            result = tf.nn.tanh(transpose3) * 150 + 255./2
+            residual1 = residual_conv(transpose3, 9, name='residual1')
+            residual2 = residual_conv(residual1, 3, name='residual2')
+
+            result = tf.nn.tanh(residual2) * 150 + 255./2
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -140,7 +143,7 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 1000
+        iterations = 1500
         # batch_size = 1
         
         for i in range(iterations):
