@@ -47,7 +47,7 @@ def conv_transpose(input, num_filters, filter_size, stride_len, name='conv_trans
         output = tf.nn.conv2d_transpose(input, weights, shape, [1, stride_len, stride_len, 1], padding='SAME')
         output = instance_norm(output)
 
-        tf.summary.histogram('transpose_output', output)
+        # tf.summary.histogram('transpose_output', output)
 
         return tf.nn.relu(output)
 
