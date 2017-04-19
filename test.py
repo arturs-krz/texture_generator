@@ -102,12 +102,12 @@ with tf.device('/gpu:0'):
             init_noise = tf.placeholder("float", shape=[1,14,14,9])
             tf.summary.histogram('Init noise', init_noise)
 
-            transpose1 = conv_transpose(init_noise, 9, 9, 4, name='transpose1')
-            transpose2 = conv_transpose(transpose1, 3, 9, 2, name='transpose2')
-            transpose3 = conv_transpose(transpose2, 3, 3, 2, name='transpose3')
+            transpose1 = conv_transpose(init_noise, 9, 9, 4, name='gen_transpose1')
+            transpose2 = conv_transpose(transpose1, 3, 9, 2, name='gen_transpose2')
+            transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
 
-            residual1 = residual_conv(transpose3, 9, name='residual1')
-            residual2 = residual_conv(residual1, 3, name='residual2')
+            residual1 = residual_conv(transpose3, 9, name='gen_residual1')
+            residual2 = residual_conv(residual1, 3, name='gen_residual2')
 
             result = tf.nn.tanh(residual2) * 150 + 255./2
             tf.summary.image('Output image', result)
@@ -132,8 +132,10 @@ with tf.device('/gpu:0'):
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
         opt_func = tf.train.AdamOptimizer(alpha)
         tvars = tf.trainable_variables()
-        grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tvars), 1)
-        train_step = opt_func.apply_gradients(zip(grads, tvars))
+        t_vars = [var for var in tvars if 'gen_' in var.name]
+
+        grads, _ = tf.clip_by_global_norm(tf.gradients(loss, t_vars), 1)
+        train_step = opt_func.apply_gradients(zip(grads, t_vars))
 
         tf.summary.scalar('loss', loss)
         writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
