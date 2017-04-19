@@ -138,7 +138,7 @@ with tf.device('/gpu:0'):
             print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = generator.result.eval(session=sess)
+        img = result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
         # img.show()
