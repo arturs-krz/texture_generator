@@ -8,7 +8,8 @@ import vgg16
 import utils
 from PIL import Image
 
-import GeneratorNet as gen
+from utilities import *
+# import GeneratorNet as gen
 
 
 # layer => shape = {1, width, height, filters}
@@ -71,33 +72,50 @@ with tf.device('/gpu:0'):
         gold_3_placeholder = tf.placeholder("float", vgg_ref.conv3_1.get_shape())
         gold_1_placeholder = tf.placeholder("float", vgg_ref.conv1_2.get_shape())
 
-        # gold_conv2_1, gold_conv5_1 = sess.run([vgg.conv2_1, vgg.conv5_1], feed_dict={images: batch1})
-
-        # gold_2_1 = tf.placeholder("float", vgg.conv2_1.get_shape())
-        # gold_5_1 = tf.placeholder("float", vgg.conv5_1.get_shape(), name="gold_5_1")
         
+        # generator = gen.GeneratorNet()
+        # generator.build()
 
-        # img = generator.run(sess)
-        # img = Image.fromarray(np.asarray(img)[0], "RGB")
-        # img.show()
 
-        # generated = tf.reshape(generator.result, [1, 224, 224, 3])
-        generator = gen.GeneratorNet()
-        generator.build()
+        with tf.name_scope('generator'):
+            # Starting data - random 4x4 noise (x3 color channels)
+            init_noise = tf.random_normal(shape=[1, 224, 224, 3])
+            # init_noise = tf.placeholder("float", shape=[1,224,224,3])
+            tf.summary.histogram('Init noise', init_noise)
+        
+            conv1 = conv(init_noise, 32, 9, 1, activation=None, name='conv1')
+            conv2 = conv(conv1, 64, 3, 2, activation=None, name='conv2')
+            conv3 = conv(conv2, 128, 3, 2, activation=None, name='conv3')
+
+            conv4 = conv(conv3, 128, 3, 2, activation='relu', name='conv4_relu')
+
+            residual1 = residual_conv(conv4, 3, name='residual1')
+            residual2 = residual_conv(residual1, 3, name='residual2')
+            residual3 = residual_conv(residual2, 3, name='residual3')
+
+            transpose1 = conv_transpose(residual3, 64, 3, 2, name='transpose1')
+            transpose2 = conv_transpose(transpose1, 32, 3, 2, name='transpose2')
+            transpose3 = conv_transpose(transpose2, 3, 9, 2, name='transpose3')
+            transpose4 = conv_transpose(transpose3, 3, 3, 1, name='transpose4')
+
+            result = tf.nn.tanh(transpose4)
+            tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
         with tf.name_scope("content_vgg"):            
-            vgg.build(generator.result)
+            vgg.build(result)
 
         # print(vgg.conv5_1.eval(session=sess))
 
         # loss = get_loss(reference=[gold_1_placeholder], generated=[vgg.conv1_2])
-        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        loss = get_loss(reference=[gold_conv1_2, gold_conv3_1, gold_conv5_1], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
         print(loss)
 
         # alpha - training rate
         alpha = 0.03
-        train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
+        # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
+        train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
 
         tf.summary.scalar('loss', loss)
         writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
@@ -107,11 +125,12 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 1000
+        iterations = 100
         # feed={gold_1_placeholder: gold_conv1_2}
-        feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
+        # feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
+        feed={}
         for i in range(iterations):
-
+            
         #     # feed = {gold_2_1: gold_conv2_1, gold_5_1: gold_conv5_1, gen_2_1: gen_conv2_1, gen_5_1: gen_conv5_1}
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
