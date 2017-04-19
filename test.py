@@ -54,7 +54,7 @@ def get_loss(reference, generated):
 
 with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
         img1 = utils.load_image("data/pebbles_small.jpg")
         batch1 = img1.reshape((1, 224, 224, 3))
