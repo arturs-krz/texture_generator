@@ -111,8 +111,8 @@ with tf.device('/gpu:0'):
         # loss = get_loss(reference=[gold_conv1_2, gold_conv3_1, gold_conv5_1], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
         # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
 
-
-        loss = tf.reduce_mean(gold_3_placeholder - vgg.conv3_1)
+        vgg_test = tf.placeholder("float", vgg.conv3_1.get_shape())
+        loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg_test, 2))
         print(loss)
 
         # alpha - training rate
@@ -132,12 +132,14 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 4000
+        iterations = 1000
         # batch_size = 1
         
         for i in range(iterations):
             batch = np.random.rand(1, 224, 224, 3)
-            feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}    
+            vgg_val = vgg.conv3_1.eval(session=sess)
+
+            feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2, vgg_test: vgg_val}    
     
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
