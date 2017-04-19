@@ -108,8 +108,8 @@ with tf.device('/gpu:0'):
         # print(vgg.conv5_1.eval(session=sess))
 
         # loss = get_loss(reference=[gold_1_placeholder], generated=[vgg.conv1_2])
-        loss = get_loss(reference=[gold_conv1_2, gold_conv3_1, gold_conv5_1], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
-        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        # loss = get_loss(reference=[gold_conv1_2, gold_conv3_1, gold_conv5_1], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
         print(loss)
 
         # alpha - training rate
@@ -127,8 +127,8 @@ with tf.device('/gpu:0'):
         
         iterations = 100
         # feed={gold_1_placeholder: gold_conv1_2}
-        # feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
-        feed={}
+        feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
+        # feed={}
         for i in range(iterations):
             
         #     # feed = {gold_2_1: gold_conv2_1, gold_5_1: gold_conv5_1, gen_2_1: gen_conv2_1, gen_5_1: gen_conv5_1}
