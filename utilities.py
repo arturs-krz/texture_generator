@@ -58,5 +58,5 @@ def instance_norm(input):
     shift = tf.Variable(tf.zeros(var_shape))
     scale = tf.Variable(tf.ones(var_shape))
     epsilon = 1e-3
-    normalized = (net-mu)/(sigma_sq + epsilon)**(.5)
+    normalized = (input - mu)/(sigma_sq + epsilon)**(.5)
     return scale * normalized + shift    
