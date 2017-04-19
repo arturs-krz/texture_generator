@@ -120,7 +120,7 @@ with tf.device('/gpu:0'):
         # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
 
 
-        loss = sum([0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)), 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2))])
+        loss = tf.reduce_sum(0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)), 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         print(loss)
 
         # alpha - training rate
