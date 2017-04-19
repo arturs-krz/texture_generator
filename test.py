@@ -107,6 +107,9 @@ with tf.device('/gpu:0'):
             conv1 = conv(transpose4, 3, 3, 2, name='gen_conv1')
             conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
             
+            print(transpose4)
+            print(conv1)
+            print(conv2)
 
             result = tf.nn.tanh(conv2) * 150 + 255./2
             tf.summary.image('Output image', result)
