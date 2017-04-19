@@ -33,9 +33,6 @@ def layer_loss(reference_layer, generated_layer):
     reference_gram = gram_matrix(reference_layer, feature_map_area, feature_map_filters)
     generated_gram = gram_matrix(generated_layer, feature_map_area, feature_map_filters)
 
-    print(reference_gram)
-    print(generated_gram)
-
     # TODO: Izpētīt, kas te fuckin notiek
     return (1 / (4 * feature_map_filters**2 * feature_map_area**2)) * tf.reduce_sum(tf.pow(generated_gram - reference_gram, 2))
     
@@ -119,11 +116,10 @@ with tf.device('/gpu:0'):
         # print(vgg.conv5_1.eval(session=sess))
 
         # loss = get_loss(reference=[gold_1_placeholder], generated=[vgg.conv1_2])
-        # loss = get_loss(reference=[gold_conv1_2, gold_conv3_1, gold_conv5_1], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
-        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
 
 
-        loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2))
+        # loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2))
         print(loss)
 
         # alpha - training rate
