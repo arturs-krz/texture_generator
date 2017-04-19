@@ -113,9 +113,13 @@ with tf.device('/gpu:0'):
         print(loss)
 
         # alpha - training rate
-        alpha = 0.001
+        alpha = 0.0001
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
-        train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
+        # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
+        opt_func = tf.train.AdamOptimizer(alpha)
+        tvars = tf.trainable_variables()
+        grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tvars), 1)
+        train_step = opt_func.apply_gradients(zip(grads, tvars))
 
         tf.summary.scalar('loss', loss)
         writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
