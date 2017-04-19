@@ -103,11 +103,12 @@ with tf.device('/gpu:0'):
             transpose2 = conv_transpose(transpose1, 6, 9, 2, name='gen_transpose2')
             transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
             transpose4 = conv_transpose(transpose3, 3, 3, 2, name='gen_transpose4')
-            transpose5 = conv_transpose(transpose4, 3, 3, 1, name='gne_transpose5')
-
+            
+            conv1 = conv(transpose4, 3, 3, 2, name='gen_conv1')
+            conv2 = conv(conv1, 3, 3, 2, name='gen_conv2')
             
 
-            result = tf.nn.tanh(transpose5) * 150 + 255./2
+            result = tf.nn.tanh(conv2) * 150 + 255./2
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
