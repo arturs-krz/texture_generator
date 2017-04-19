@@ -109,11 +109,14 @@ with tf.device('/gpu:0'):
 
         # loss = get_loss(reference=[gold_1_placeholder], generated=[vgg.conv1_2])
         # loss = get_loss(reference=[gold_conv1_2, gold_conv3_1, gold_conv5_1], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
-        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+
+
+        loss = tf.reduce_mean(gold_3_placeholder - vgg.conv3_1)
         print(loss)
 
         # alpha - training rate
-        alpha = 0.0001
+        alpha = 0.001
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
         opt_func = tf.train.AdamOptimizer(alpha)
@@ -129,7 +132,7 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 250
+        iterations = 4000
         # batch_size = 1
         
         for i in range(iterations):
