@@ -99,7 +99,7 @@ with tf.device('/gpu:0'):
             # transpose3 = conv_transpose(transpose2, 3, 9, 2, name='transpose3')
             # transpose4 = conv_transpose(transpose3, 3, 3, 1, name='transpose4')
 
-            init_noise = tf.placeholder("float", shape[1,14,14,9])
+            init_noise = tf.placeholder("float", shape=[1,14,14,9])
             tf.summary.histogram('Init noise', init_noise)
 
             transpose1 = conv_transpose(init_noise, 9, 9, 4, name='transpose1')
