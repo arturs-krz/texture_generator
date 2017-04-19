@@ -79,8 +79,8 @@ with tf.device('/gpu:0'):
 
         with tf.name_scope('generator'):
             # Starting data - random 4x4 noise (x3 color channels)
-            init_noise = tf.random_normal(shape=[1, 224, 224, 3])
-            # init_noise = tf.placeholder("float", shape=[1,224,224,3])
+            # init_noise = tf.random_normal(shape=[1, 224, 224, 3])
+            init_noise = tf.placeholder("float", shape=[None,224,224,3])
             tf.summary.histogram('Init noise', init_noise)
         
             conv1 = conv(init_noise, 32, 9, 1, activation=None, name='conv1')
@@ -98,7 +98,7 @@ with tf.device('/gpu:0'):
             transpose3 = conv_transpose(transpose2, 3, 9, 2, name='transpose3')
             transpose4 = conv_transpose(transpose3, 3, 3, 1, name='transpose4')
 
-            result = tf.nn.tanh(transpose4)
+            result = tf.nn.tanh(transpose4) * 150 + 255./2
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -113,7 +113,7 @@ with tf.device('/gpu:0'):
         print(loss)
 
         # alpha - training rate
-        alpha = 0.03
+        alpha = 0.001
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
         train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
 
@@ -125,20 +125,21 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 100
-        # feed={gold_1_placeholder: gold_conv1_2}
-        feed={gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}
-        # feed={}
+        iterations = 250
+        batch_size = 10
+        
         for i in range(iterations):
-            
-        #     # feed = {gold_2_1: gold_conv2_1, gold_5_1: gold_conv5_1, gen_2_1: gen_conv2_1, gen_5_1: gen_conv5_1}
+            batch = np.random.rand(batch_size, 224, 224, 3)
+            feed={init_noise: batch,gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}    
+    
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
             writer.add_summary(summary, i)
-            print("Iteration #{}: loss = {}".format(i, loss_value))
+            if i%10 == 0:
+                print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = result.eval(session=sess)
+        img = result.eval(session=sess, feed_dict={init_noise: np.random.rand(1,224,224,3)})
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
         # img.show()

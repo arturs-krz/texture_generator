@@ -21,6 +21,7 @@ def conv(input, num_filters, filter_size, stride_len, activation='relu', name='c
             filter=weights, 
             strides=[1, stride_len, stride_len, 1], 
             padding="SAME")
+        output = instance_norm(output)
         
         tf.summary.histogram('conv_output', output)
 
@@ -44,7 +45,18 @@ def conv_transpose(input, num_filters, filter_size, stride_len, name='conv_trans
 
         shape = tf.stack([input_shape[0], input_shape[1] * stride_len, input_shape[2] * stride_len, num_filters])
         output = tf.nn.conv2d_transpose(input, weights, shape, [1, stride_len, stride_len, 1], padding='SAME')
+        output = instance_norm(output)
 
         tf.summary.histogram('transpose_output', output)
 
         return tf.nn.relu(output)
+
+def instance_norm(input):
+    input_shape = input.get_shape().as_list()
+    var_shape = [input_shape[3]]
+    mu, sigma_sq = tf.nn.moments(input, [1,2], keep_dims=True)
+    shift = tf.Variable(tf.zeros(var_shape))
+    scale = tf.Variable(tf.ones(var_shape))
+    epsilon = 1e-3
+    normalized = (net-mu)/(sigma_sq + epsilon)**(.5)
+    return scale * normalized + shift    
