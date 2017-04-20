@@ -33,7 +33,6 @@ def layer_loss(reference_layer, generated_layer):
     reference_gram = gram_matrix(reference_layer, feature_map_area, feature_map_filters)
     generated_gram = gram_matrix(generated_layer, feature_map_area, feature_map_filters)
 
-    # TODO: Izpētīt, kas te fuckin notiek
     return (1 / (4 * feature_map_filters**2 * feature_map_area**2)) * tf.reduce_sum(tf.pow(generated_gram - reference_gram, 2))
     
     # result = tf.reduce_sum(tf.pow(tf.subtract(generated_gram, reference_gram), 2))
@@ -76,40 +75,25 @@ with tf.device('/gpu:0'):
 
         with tf.name_scope('generator'):
             # Starting data - random 4x4 noise (x3 color channels)
-            # init_noise = tf.random_normal(shape=[1, 224, 224, 3])
+            init_noise = tf.random_normal(shape=[1, 224, 224, 3])
 
-            # init_noise = tf.placeholder("float", shape=[1,224,224,3])
-            # tf.summary.histogram('Init noise', init_noise)
-        
-            # conv1 = conv(init_noise, 32, 9, 1, activation=None, name='conv1')
-            # conv2 = conv(conv1, 64, 3, 2, activation=None, name='conv2')
-            # conv3 = conv(conv2, 128, 3, 2, activation=None, name='conv3')
-
-            # conv4 = conv(conv3, 128, 3, 2, activation='relu', name='conv4_relu')
-
-            # residual1 = residual_conv(conv4, 3, name='residual1')
-            # residual2 = residual_conv(residual1, 3, name='residual2')
-            # residual3 = residual_conv(residual2, 3, name='residual3')
-
-            # transpose1 = conv_transpose(residual3, 64, 3, 2, name='transpose1')
-            # transpose2 = conv_transpose(transpose1, 32, 3, 2, name='transpose2')
-            # transpose3 = conv_transpose(transpose2, 3, 9, 2, name='transpose3')
-            # transpose4 = conv_transpose(transpose3, 3, 3, 1, name='transpose4')
-
-            init_noise = tf.placeholder("float", shape=[1,14,14,9])
+            init_noise = tf.placeholder("float", shape=[1,224,224,3])
             tf.summary.histogram('Init noise', init_noise)
+        
+            conv1 = conv(init_noise, 32, 9, 1, activation=None, name='conv1')
+            conv2 = conv(conv1, 64, 3, 2, activation=None, name='conv2')
+            conv3 = conv(conv2, 128, 3, 2, activation=None, name='conv3')
 
-            transpose1 = conv_transpose(init_noise, 9, 9, 2, name='gen_transpose1')
-            transpose2 = conv_transpose(transpose1, 6, 9, 2, name='gen_transpose2')
-            transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
-            transpose4 = conv_transpose(transpose3, 3, 3, 2, name='gen_transpose4')
-            
-            conv1 = conv(transpose4, 3, 3, 2, name='gen_conv1')
-            conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
-            
-            print(transpose4)
-            print(conv1)
-            print(conv2)
+            conv4 = conv(conv3, 128, 3, 2, activation='relu', name='conv4_relu')
+
+            residual1 = residual_conv(conv4, 3, name='residual1')
+            residual2 = residual_conv(residual1, 3, name='residual2')
+            residual3 = residual_conv(residual2, 3, name='residual3')
+
+            transpose1 = conv_transpose(residual3, 64, 3, 2, name='transpose1')
+            transpose2 = conv_transpose(transpose1, 32, 3, 2, name='transpose2')
+            transpose3 = conv_transpose(transpose2, 3, 9, 2, name='transpose3')
+            transpose4 = conv_transpose(transpose3, 3, 3, 1, name='transpose4')
 
             result = tf.nn.tanh(conv2) * 150 + 255./2
             tf.summary.image('Output image', result)
@@ -121,11 +105,10 @@ with tf.device('/gpu:0'):
         # print(vgg.conv5_1.eval(session=sess))
 
         # loss = get_loss(reference=[gold_3_placeholder], generated=[vgg.conv3_1])
-        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        
 
-
-        loss = tf.reduce_sum(0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
-        print(loss)
+        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        # loss = tf.reduce_sum(0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
 
         # alpha - training rate
         alpha = 0.001
@@ -150,7 +133,7 @@ with tf.device('/gpu:0'):
         # batch_size = 1
         
         for i in range(iterations):
-            batch = np.random.rand(1, 14, 14, 9)
+            batch = np.random.rand(1, 224, 224, 3)
             feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}    
     
             train_step.run(session=sess, feed_dict=feed)
@@ -160,7 +143,7 @@ with tf.device('/gpu:0'):
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = result.eval(session=sess, feed_dict={init_noise: np.random.rand(1,14,14,9)})
+        img = result.eval(session=sess, feed_dict={init_noise: np.random.rand(1,224,224,3)})
         # img = result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
