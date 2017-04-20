@@ -80,22 +80,19 @@ with tf.device('/gpu:0'):
             init_noise = tf.placeholder("float", shape=[1,224,224,3])
             tf.summary.histogram('Init noise', init_noise)
         
-            conv1 = conv(init_noise, 32, 9, 1, activation=None, name='conv1')
-            conv2 = conv(conv1, 64, 3, 2, activation=None, name='conv2')
-            conv3 = conv(conv2, 128, 3, 2, activation=None, name='conv3')
+            conv1 = conv(init_noise, 32, 9, 1, activation='relu', name='gen_conv1')
+            conv2 = conv(conv1, 64, 3, 2, activation='relu', name='gen_conv2')
+            conv3 = conv(conv2, 128, 3, 2, activation='relu', name='gen_conv3')
 
-            conv4 = conv(conv3, 128, 3, 2, activation='relu', name='conv4_relu')
+            residual1 = residual_conv(conv3, 3, name='gen_residual1')
+            residual2 = residual_conv(residual1, 3, name='gen_residual2')
+            residual3 = residual_conv(residual2, 3, name='gen_residual3')
 
-            residual1 = residual_conv(conv4, 3, name='residual1')
-            residual2 = residual_conv(residual1, 3, name='residual2')
-            residual3 = residual_conv(residual2, 3, name='residual3')
+            transpose1 = conv_transpose(residual3, 64, 3, 2, name='gen_transpose1')
+            transpose2 = conv_transpose(transpose1, 32, 3, 2, name='gen_transpose2')
+            transpose3 = conv_transpose(transpose2, 3, 9, 2, name='gen_transpose3')
 
-            transpose1 = conv_transpose(residual3, 64, 3, 2, name='transpose1')
-            transpose2 = conv_transpose(transpose1, 32, 3, 2, name='transpose2')
-            transpose3 = conv_transpose(transpose2, 3, 9, 2, name='transpose3')
-            transpose4 = conv_transpose(transpose3, 3, 3, 1, name='transpose4')
-
-            result = tf.nn.tanh(conv2) * 150 + 255./2
+            result = tf.nn.tanh(transpose3) * 150 + 255./2
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
