@@ -90,7 +90,7 @@ with tf.device('/gpu:0'):
 
             transpose1 = conv_transpose(residual3, 64, 3, 2, name='gen_transpose1')
             transpose2 = conv_transpose(transpose1, 32, 3, 2, name='gen_transpose2')
-            transpose3 = conv_transpose(transpose2, 3, 9, 2, name='gen_transpose3')
+            transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
 
             result = tf.nn.tanh(transpose3) * 150 + 255./2
             tf.summary.image('Output image', result)
