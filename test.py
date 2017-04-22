@@ -75,14 +75,14 @@ with tf.device('/gpu:0'):
 
         with tf.name_scope('generator'):
             # Starting data - random 4x4 noise (x3 color channels)
-            # init_noise = tf.random_normal(shape=[1, 224, 224, 3])
+            init_noise = tf.placeholder("float", shape=[1, 224, 224, 3])
 
-            init_noise = tf.placeholder("float", shape=[1,28,28,3])
-            tf.summary.histogram('Init noise', init_noise)
+            # init_noise = tf.placeholder("float", shape=[1,28,28,3])
+            # tf.summary.histogram('Init noise', init_noise)
 
-            h1 = conv_transpose(init_noise, 3, 9, 2, name="gen_transpose1")
-            h2 = conv_transpose(h1, 3, 5, 2, name="gen_transpose2")
-            h3 = conv_transpose(h2, 3, 3, 2, name="gen_transpose3")
+            # h1 = conv_transpose(init_noise, 3, 9, 2, name="gen_transpose1")
+            # h2 = conv_transpose(h1, 3, 5, 2, name="gen_transpose2")
+            # h3 = conv_transpose(h2, 3, 3, 2, name="gen_transpose3")
         
             # conv1 = conv(init_noise, 32, 9, 1, activation='relu', name='gen_conv1')
             # conv2 = conv(conv1, 64, 3, 2, activation='relu', name='gen_conv2')
@@ -96,7 +96,8 @@ with tf.device('/gpu:0'):
             # transpose2 = conv_transpose(transpose1, 32, 3, 2, name='gen_transpose2')
             # transpose3 = conv_transpose(transpose2, 3, 3, 1, name='gen_transpose3')
 
-            result = tf.nn.tanh(h3) * 150 + 255./2
+            # result = tf.nn.tanh(h3) * 150 + 255./2
+            result = conv(init_noise, 3, 3, 1, name='conv')
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -137,7 +138,8 @@ with tf.device('/gpu:0'):
         # batch_size = 1
         
         for i in range(iterations):
-            batch = np.random.rand(1, 28, 28, 3)
+            # batch = np.random.rand(1, 28, 28, 3)
+            batch = batch1
             feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}    
     
             train_step.run(session=sess, feed_dict=feed)
