@@ -144,7 +144,8 @@ with tf.device('/gpu:0'):
         # batch_size = 1
         
         for i in range(iterations):
-            batch = (np.random.rand(1, 224, 224, 3)*32)+112
+            # batch = (np.random.rand(1, 224, 224, 3)*32)+112
+            batch = (0.6 * np.random.uniform(-20,20,(1,224,224,3)).astype("float32")) + (0.4 * batch1)
             # batch = batch1
             feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}    
     
@@ -155,7 +156,7 @@ with tf.device('/gpu:0'):
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = result.eval(session=sess, feed_dict={init_noise: (np.random.rand(1, 224, 224, 3)*32)+112})
+        img = result.eval(session=sess, feed_dict={init_noise: (0.6 * np.random.uniform(-20,20,(1,224,224,3)).astype("float32")) + (0.4 * batch1)})
         # img = result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
