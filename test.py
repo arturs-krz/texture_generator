@@ -81,7 +81,11 @@ with tf.device('/gpu:0'):
             tf.summary.image('Init noise', init_noise)
 
             h1 = conv_transpose(init_noise, 3, 9, 2, name="gen_transpose1")
+            tf.summary.image('First layer', h1)
+
             h2 = conv_transpose(h1, 3, 5, 2, name="gen_transpose2")
+            tf.summary.image('Second layer', h2)
+
             h3 = conv_transpose(h2, 3, 3, 2, name="gen_transpose3")
         
             # conv1 = conv(init_noise, 32, 9, 1, activation='relu', name='gen_conv1')
@@ -138,7 +142,7 @@ with tf.device('/gpu:0'):
         # batch_size = 1
         
         for i in range(iterations):
-            batch = np.random.rand(1, 28, 28, 3)*255
+            batch = (np.random.rand(1, 28, 28, 3)*64)+96
             # batch = batch1
             feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2}    
     
@@ -149,7 +153,7 @@ with tf.device('/gpu:0'):
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = result.eval(session=sess, feed_dict={init_noise: np.random.rand(1,28,28,3)*255})
+        img = result.eval(session=sess, feed_dict={init_noise: (np.random.rand(1, 28, 28, 3)*64)+96})
         # img = result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
