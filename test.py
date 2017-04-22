@@ -108,7 +108,7 @@ with tf.device('/gpu:0'):
             transpose1 = conv_transpose(init_noise, 3, 9, 2, name='gen_transpose1')
             tf.summary.image('First layer', transpose1)
 
-            transpose2 = conv_transpose(transpose1, 3, 3, 2, name='gen_transpose2')\
+            transpose2 = conv_transpose(transpose1, 3, 3, 2, name='gen_transpose2')
             tf.summary.image('Second layer', transpose2)
 
             transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
