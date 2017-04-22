@@ -55,6 +55,7 @@ with tf.device('/gpu:0'):
         
         img1 = utils.load_image("data/red.jpg")
         batch1 = img1.reshape((1, 224, 224, 3))
+        input_ref = img1.reshape((1, 28, 28, 3))
         # batch = np.concatenate((batch1, batch2), 0)
         images = tf.placeholder("float", [1, 224, 224, 3])
         # feed_dict = {images: batch1}
@@ -77,10 +78,10 @@ with tf.device('/gpu:0'):
             # Starting data - random 4x4 noise (x3 color channels)
             # init_noise = tf.placeholder("float", shape=[1, 224, 224, 3])
 
-            init_noise = tf.placeholder("float", shape=[1,224,224,3])
+            init_noise = tf.placeholder("float", shape=[1,28,28,3])
             tf.summary.image('Init noise', init_noise)
 
-            h1 = conv(init_noise, 9, 9, 2, name="gen_conv1")
+            # h1 = conv(init_noise, 9, 9, 2, name="gen_conv1")
             # print(h1)
             # tf.summary.image('First layer', h1)
 
@@ -104,8 +105,14 @@ with tf.device('/gpu:0'):
 
             # result = h3
             # result = conv(h1, 3, 3, 1, name='gen_conv')
-            transpose1 = conv_transpose(h1, 3, 3, 2, name='gen_transpose1')
-            result = transpose1
+            transpose1 = conv_transpose(init_noise, 3, 9, 2, name='gen_transpose1')
+            tf.summary.image('First layer', transpose1)
+
+            transpose2 = conv_transpose(transpose1, 3, 3, 2, name='gen_transpose2')\
+            tf.summary.image('Second layer', transpose2)
+
+            transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
+            result = transpose3
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -144,7 +151,7 @@ with tf.device('/gpu:0'):
         
         iterations = 1500
         # batch_size = 1
-        batch = (0.6 * np.random.uniform(-20,20,(1,224,224,3)).astype("float32")) + (0.4 * batch1)
+        batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             
@@ -155,11 +162,11 @@ with tf.device('/gpu:0'):
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
             writer.add_summary(summary, i)
             if i%10 == 0:
-                batch = (0.6 * np.random.uniform(-20,20,(1,224,224,3)).astype("float32")) + (0.4 * batch1)
+                batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = result.eval(session=sess, feed_dict={init_noise: (0.6 * np.random.uniform(-20,20,(1,224,224,3)).astype("float32")) + (0.4 * batch1)})
+        img = result.eval(session=sess, feed_dict={init_noise: (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)})
         # img = result.eval(session=sess)
         img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/result.bmp')
