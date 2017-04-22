@@ -80,9 +80,9 @@ with tf.device('/gpu:0'):
             init_noise = tf.placeholder("float", shape=[1,224,224,3])
             tf.summary.image('Init noise', init_noise)
 
-            # h1 = conv(init_noise, 3, 9, 1, name="gen_conv1")
+            h1 = conv(init_noise, 3, 3, 1, name="gen_conv1")
             # print(h1)
-            # tf.summary.image('First layer', h1)
+            tf.summary.image('First layer', h1)
 
             # h2 = conv(h1, 3, 5, 1, name="gen_conv2")
             # print(h2)
@@ -103,7 +103,7 @@ with tf.device('/gpu:0'):
             # transpose3 = conv_transpose(transpose2, 3, 3, 1, name='gen_transpose3')
 
             # result = h3
-            result = conv(init_noise, 3, 3, 1, name='gen_conv')
+            result = conv(h1, 3, 3, 1, name='gen_conv')
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
