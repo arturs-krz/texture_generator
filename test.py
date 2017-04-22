@@ -33,8 +33,8 @@ def layer_loss(reference_layer, generated_layer):
     reference_gram = gram_matrix(reference_layer, feature_map_area, feature_map_filters)
     generated_gram = gram_matrix(generated_layer, feature_map_area, feature_map_filters)
 
-    # return (1 / (3 * feature_map_filters**2 * feature_map_area**2)) * tf.reduce_sum(tf.pow(generated_gram - reference_gram, 2))
-    return tf.reduce_sum(tf.pow(generated_gram - reference_gram, 2))
+    return (1 / (3 * feature_map_filters**2 * feature_map_area**2)) * tf.reduce_sum(tf.pow(generated_gram - reference_gram, 2))
+    # return tf.reduce_sum(tf.pow(generated_gram - reference_gram, 2))
     
     # result = tf.reduce_sum(tf.pow(tf.subtract(generated_gram, reference_gram), 2))
     # result = tf.pow(tf.subtract(generated_gram, reference_gram), 2)
@@ -115,11 +115,11 @@ with tf.device('/gpu:0'):
             transpose2 = conv_transpose(transpose1, 3, 4, 2, name='gen_transpose2')
             tf.summary.image('Second layer', transpose2)
 
-            conv1 = conv(transpose2, 3, 4, 1, name='gen_conv1')
-            conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
+            conv1 = conv(transpose2, 3, 3, 1, name='gen_conv1')
+            # conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
 
             # transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
-            result = conv2
+            result = conv1
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -131,9 +131,9 @@ with tf.device('/gpu:0'):
         # loss = get_loss(reference=[gold_3_placeholder], generated=[vgg.conv3_1])
         
 
-        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
+        loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
         # Random loss function
-        loss = tf.reduce_sum(0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
+        # loss = tf.reduce_sum(0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_2))
         # loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2))
 
