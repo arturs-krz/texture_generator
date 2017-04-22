@@ -53,9 +53,13 @@ with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
-        img1 = utils.load_image("data/red.jpg")
+        image_path = "data/red.jpg"
+
+        img1 = utils.load_image(image_path)
         batch1 = img1.reshape((1, 224, 224, 3))
-        input_ref = img1.reshape((1, 28, 28, 3))
+
+        input_ref = utils.load_image(image_path, 28).reshape((1, 28, 28, 3))
+        
         # batch = np.concatenate((batch1, batch2), 0)
         images = tf.placeholder("float", [1, 224, 224, 3])
         # feed_dict = {images: batch1}
