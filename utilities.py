@@ -3,7 +3,7 @@ import tensorflow as tf
 # shape = [size, size, in_channels, out_channels]
 def weight_var(shape):
     # atgriež random vērtības no normālsadalījuma max 2 standartnoviržu attālumā
-    initial = tf.truncated_normal(shape, stddev=0.1)
+    initial = tf.truncated_normal(shape, stddev=0.2, mean=0.5)
     return tf.Variable(initial)
 
 def bias_var(shape):
