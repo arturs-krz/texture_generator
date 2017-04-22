@@ -109,14 +109,14 @@ with tf.device('/gpu:0'):
 
             # result = h3
             # result = conv(h1, 3, 3, 1, name='gen_conv')
-            transpose1 = conv_transpose(init_noise, 3, 9, 2, name='gen_transpose1')
+            transpose1 = conv_transpose(init_noise, 3, 4, 4, name='gen_transpose1')
             tf.summary.image('First layer', transpose1)
 
             transpose2 = conv_transpose(transpose1, 3, 3, 2, name='gen_transpose2')
             tf.summary.image('Second layer', transpose2)
 
-            transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
-            result = transpose3
+            # transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
+            result = transpose2
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
