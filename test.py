@@ -82,7 +82,7 @@ with tf.device('/gpu:0'):
 
             h1 = conv(init_noise, 9, 9, 2, name="gen_conv1")
             # print(h1)
-            tf.summary.image('First layer', h1)
+            # tf.summary.image('First layer', h1)
 
             # h2 = conv(h1, 3, 5, 1, name="gen_conv2")
             # print(h2)
