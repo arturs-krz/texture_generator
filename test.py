@@ -78,7 +78,7 @@ with tf.device('/gpu:0'):
             # init_noise = tf.placeholder("float", shape=[1, 224, 224, 3])
 
             init_noise = tf.placeholder("float", shape=[1,28,28,3])
-            tf.summary.histogram('Init noise', init_noise)
+            tf.summary.image('Init noise', init_noise)
 
             h1 = conv_transpose(init_noise, 3, 9, 2, name="gen_transpose1")
             h2 = conv_transpose(h1, 3, 5, 2, name="gen_transpose2")
@@ -96,7 +96,7 @@ with tf.device('/gpu:0'):
             # transpose2 = conv_transpose(transpose1, 32, 3, 2, name='gen_transpose2')
             # transpose3 = conv_transpose(transpose2, 3, 3, 1, name='gen_transpose3')
 
-            result = tf.nn.tanh(h3)
+            result = h3
             # result = conv(init_noise, 3, 3, 1, name='gen_conv')
             tf.summary.image('Output image', result)
 
