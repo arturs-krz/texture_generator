@@ -80,7 +80,7 @@ with tf.device('/gpu:0'):
             init_noise = tf.placeholder("float", shape=[1,224,224,3])
             tf.summary.image('Init noise', init_noise)
 
-            h1 = conv(init_noise, 3, 9, 2, name="gen_conv1")
+            h1 = conv(init_noise, 9, 9, 2, name="gen_conv1")
             # print(h1)
             tf.summary.image('First layer', h1)
 
@@ -105,7 +105,7 @@ with tf.device('/gpu:0'):
             # result = h3
             # result = conv(h1, 3, 3, 1, name='gen_conv')
             transpose1 = conv_transpose(h1, 3, 3, 2, name='gen_transpose1')
-            result = tf.nn.tanh(transpose1)*255.
+            result = transpose1
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
@@ -142,7 +142,7 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 1200
+        iterations = 1500
         # batch_size = 1
         batch = (0.6 * np.random.uniform(-20,20,(1,224,224,3)).astype("float32")) + (0.4 * batch1)
         for i in range(iterations):
