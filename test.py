@@ -97,7 +97,7 @@ with tf.device('/gpu:0'):
             # transpose3 = conv_transpose(transpose2, 3, 3, 1, name='gen_transpose3')
 
             # result = tf.nn.tanh(h3) * 150 + 255./2
-            result = conv(init_noise, 3, 3, 1, name='conv')
+            result = conv(init_noise, 3, 3, 1, name='gen_conv')
             tf.summary.image('Output image', result)
 
         vgg = vgg16.Vgg16()
