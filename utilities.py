@@ -36,8 +36,10 @@ def residual_conv(input, filter_size, name='residual'):
         residual_layer = conv(input, input_shape[3], filter_size, 1, name=name+'_residual')
         return input + conv(residual_layer, input_shape[3], filter_size, 1, activation='relu')
 
-
 def conv_transpose(input, num_filters, filter_size, stride_len, name='conv_transpose'):
+    """
+    Output shape = [batch, x*stride, y*stride, num_filters]
+    """
     with tf.name_scope(name):
         input_shape = input.get_shape().as_list()
         weights = weight_var(shape=[filter_size, filter_size, num_filters, input_shape[3]])
