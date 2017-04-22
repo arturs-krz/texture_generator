@@ -137,7 +137,7 @@ with tf.device('/gpu:0'):
         # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
         loss = get_loss(reference=[gold_4_content], generated=[vgg.conv4_2])
         # Random loss function
-        # loss = tf.reduce_sum(0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
+        loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_2))
         # loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2))
 
