@@ -116,7 +116,7 @@ with tf.device('/gpu:0'):
         loss = tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2))
 
         # alpha - training rate
-        alpha = 3
+        alpha = 0.001
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
         opt_func = tf.train.AdamOptimizer(alpha)
