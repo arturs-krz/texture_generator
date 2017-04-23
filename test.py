@@ -112,16 +112,16 @@ with tf.device('/gpu:0'):
 
             # result = h3
             # result = conv(h1, 3, 3, 1, name='gen_conv')
-            transpose1 = conv_transpose(init_noise, 3, 4, 4, name='gen_transpose1')
+            transpose1 = conv_transpose(init_noise, 3, 7, 4, name='gen_transpose1')
             tf.summary.image('First layer', transpose1)
 
-            transpose2 = conv_transpose(transpose1, 3, 4, 2, name='gen_transpose2')
+            transpose2 = conv_transpose(transpose1, 3, 7, 2, name='gen_transpose2')
             tf.summary.image('Second layer', transpose2)
 
             # transpose3 = conv_transpose(transpose2, 3, 4, 2, name='gen_transpose3')
             # tf.summary.image('Third layer', transpose3)
 
-            conv1 = conv(transpose2, 3, 4, 1, name='gen_conv1')
+            conv1 = conv(transpose2, 3, 7, 1, name='gen_conv1')
 
             print(transpose1)
             print(transpose2)
@@ -168,7 +168,7 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 1500
+        iterations = 1000
         # batch_size = 1
         batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
         for i in range(iterations):
