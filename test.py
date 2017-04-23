@@ -112,11 +112,11 @@ with tf.device('/gpu:0'):
 
             # result = h3
             # result = conv(h1, 3, 3, 1, name='gen_conv')
-            transpose1 = conv_transpose(init_noise, 3, 7, 4, name='gen_transpose1')
-            tf.summary.image('First layer', transpose1)
+            transpose1 = conv_transpose(init_noise, 9, 7, 4, name='gen_transpose1')
+            # tf.summary.image('First layer', transpose1)
 
-            transpose2 = conv_transpose(transpose1, 3, 3, 2, name='gen_transpose2')
-            tf.summary.image('Second layer', transpose2)
+            transpose2 = conv_transpose(transpose1, 6, 3, 2, name='gen_transpose2')
+            # tf.summary.image('Second layer', transpose2)
 
             # transpose3 = conv_transpose(transpose2, 3, 4, 2, name='gen_transpose3')
             # tf.summary.image('Third layer', transpose3)
@@ -147,7 +147,7 @@ with tf.device('/gpu:0'):
         # Random loss function
         # loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
-        loss = tf.reduce_sum(0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2)) + 0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)))
+        loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
 
         # alpha - training rate
         alpha = 0.001
