@@ -62,3 +62,36 @@ def instance_norm(input):
     epsilon = 1e-3
     normalized = (input - mu)/(sigma_sq + epsilon)**(.5)
     return scale * normalized + shift    
+
+def gram_matrix(activation_layer):
+    layer_shape = activation_layer.get_shape().as_list()
+    
+    # N filters / feature maps
+    N = layer_shape[3]
+    # M = x * y
+    M = layer_shape[1] * layer_shape[2]
+
+    F = tf.reshape(activation_layer, shape=[-1, N])
+    FT = tf.transpose(F)
+    G = tf.matmul(F,FT) / M
+    return G
+
+
+def gram_loss(target_gram, generated, layer_weight=1.0):
+    layer_shape = generated.get_shape().as_list()
+    # N filters / feature maps
+    N = layer_shape[3]
+    # M = x * y
+    M = layer_shape[1] * layer_shape[2]
+
+    F = tf.reshape(generated, shape=[-1, N])
+    FT = tf.transpose(F)
+    G = tf.matmul(F,FT) / M
+
+    gram_diff = G - target_gram
+    loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
+    gradient = tf.reshape(layer_weight * tf.transpose(tf.matmul(FT, gram_diff)) / (M * N**2), shape=layer_shape)
+
+    return [loss, gradient]
+
+

@@ -55,6 +55,9 @@ with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
+        used_layers = [
+            ('conv1_1', 1.0)
+        ]
         image_path = "data/red.jpg"
 
         img1 = utils.load_image(image_path)
@@ -70,12 +73,19 @@ with tf.device('/gpu:0'):
         with tf.name_scope("content_vgg"):
             vgg_ref.build(images)
  
-        gold_conv5_1, gold_conv3_1, gold_conv1_1, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_1, vgg_ref.conv4_2], feed_dict={images: batch1})        
-        gold_5_placeholder = tf.placeholder("float", vgg_ref.conv5_1.get_shape())
-        gold_3_placeholder = tf.placeholder("float", vgg_ref.conv3_1.get_shape())
-        gold_1_placeholder = tf.placeholder("float", vgg_ref.conv1_1.get_shape())
+        # target_grams = [sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1 }) for layer in used_layers]
+        target_grams = {}
+        for layer in used_layers:
+            # target_grams[layer[0]] = sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1})
+            target_grams[layer[0]] = getattr(vgg_ref, layer[0])
 
-        gold_4_content = tf.placeholder("float", vgg_ref.conv4_2.get_shape())
+
+        # gold_conv5_1, gold_conv3_1, gold_conv1_1, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_1, vgg_ref.conv4_2], feed_dict={images: batch1})        
+        # gold_5_placeholder = tf.placeholder("float", vgg_ref.conv5_1.get_shape())
+        # gold_3_placeholder = tf.placeholder("float", vgg_ref.conv3_1.get_shape())
+        # gold_1_placeholder = tf.placeholder("float", vgg_ref.conv1_1.get_shape())
+
+        # gold_4_content = tf.placeholder("float", vgg_ref.conv4_2.get_shape())
 
         
         # generator = gen.GeneratorNet()
@@ -148,7 +158,13 @@ with tf.device('/gpu:0'):
         # Random loss function
         # loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
-        loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
+        # loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
+        total_loss = 0
+        total_grad = 0
+        for layer in used_layers:
+            loss, grad = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
+            total_loss += loss
+            total_grad += grad
 
         # alpha - training rate
         alpha = 0.001
@@ -158,10 +174,10 @@ with tf.device('/gpu:0'):
         tvars = tf.trainable_variables()
         t_vars = [var for var in tvars if 'gen_' in var.name]
 
-        grads, _ = tf.clip_by_global_norm(tf.gradients(loss, t_vars), 1)
+        grads, _ = tf.clip_by_global_norm(tf.gradients(total_grad, t_vars), 1)
         train_step = opt_func.apply_gradients(zip(grads, t_vars))
 
-        tf.summary.scalar('loss', loss)
+        tf.summary.scalar('loss', total_loss)
         writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
 
         summary_op = tf.summary.merge_all()
