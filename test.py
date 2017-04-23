@@ -125,7 +125,7 @@ with tf.device('/gpu:0'):
 
             print(transpose1)
             print(transpose2)
-            print(transpose3)
+            # print(transpose3)
             # print(conv1)
             # conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
 
