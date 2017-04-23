@@ -77,7 +77,7 @@ with tf.device('/gpu:0'):
         target_grams = {}
         for layer in used_layers:
             # target_grams[layer[0]] = sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1})
-            target_grams[layer[0]] = getattr(vgg_ref, layer[0])
+            target_grams[layer[0]] = gram_matrix(getattr(vgg_ref, layer[0]))
 
 
         # gold_conv5_1, gold_conv3_1, gold_conv1_1, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_1, vgg_ref.conv4_2], feed_dict={images: batch1})        
