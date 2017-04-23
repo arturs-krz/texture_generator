@@ -146,8 +146,8 @@ with tf.device('/gpu:0'):
         # loss = get_loss(reference=[gold_4_content], generated=[vgg.conv4_2])
         # Random loss function
         # loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
-        # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_2))
-        loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
+        # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
+        loss = tf.reduce_sum(0.3*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2)) + 0.7*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)))
 
         # alpha - training rate
         alpha = 0.001
@@ -170,10 +170,9 @@ with tf.device('/gpu:0'):
         
         iterations = 1000
         # batch_size = 1
-        # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+        batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
-            batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             # batch = batch1
             feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_1, gold_4_content: gold_conv4_2}    
     
@@ -181,7 +180,7 @@ with tf.device('/gpu:0'):
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
             writer.add_summary(summary, i)
             if i%10 == 0:
-                # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+                batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
