@@ -159,8 +159,8 @@ with tf.device('/gpu:0'):
         # loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
         # loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
-        total_loss = 0
-        total_grad = 0
+        total_loss = tf.zeros([1])
+        total_grad = tf.zeros([1])
         for layer in used_layers:
             loss, grad = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
             total_loss += loss
@@ -194,7 +194,7 @@ with tf.device('/gpu:0'):
             feed={init_noise: batch, images: batch1}    
     
             train_step.run(session=sess, feed_dict=feed)
-            summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
+            summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
             writer.add_summary(summary, i)
             if i%10 == 0:
                 batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
