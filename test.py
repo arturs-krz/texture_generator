@@ -69,10 +69,10 @@ with tf.device('/gpu:0'):
         with tf.name_scope("content_vgg"):
             vgg_ref.build(images)
  
-        gold_conv5_1, gold_conv3_1, gold_conv1_2, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_2, vgg_ref.conv4_2], feed_dict={images: batch1})        
+        gold_conv5_1, gold_conv3_1, gold_conv1_1, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_1, vgg_ref.conv4_2], feed_dict={images: batch1})        
         gold_5_placeholder = tf.placeholder("float", vgg_ref.conv5_1.get_shape())
         gold_3_placeholder = tf.placeholder("float", vgg_ref.conv3_1.get_shape())
-        gold_1_placeholder = tf.placeholder("float", vgg_ref.conv1_2.get_shape())
+        gold_1_placeholder = tf.placeholder("float", vgg_ref.conv1_1.get_shape())
 
         gold_4_content = tf.placeholder("float", vgg_ref.conv4_2.get_shape())
 
@@ -175,7 +175,7 @@ with tf.device('/gpu:0'):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             
             # batch = batch1
-            feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_2, gold_4_content: gold_conv4_2}    
+            feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_1, gold_4_content: gold_conv4_2}    
     
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
