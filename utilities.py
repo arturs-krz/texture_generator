@@ -71,7 +71,7 @@ def gram_matrix(activation_layer):
     # M = x * y
     M = layer_shape[1] * layer_shape[2]
 
-    F = tf.reshape(activation_layer, shape=[-1, N])
+    F = tf.reshape(activation_layer, shape=[N, -1])
     FT = tf.transpose(F)
     G = tf.matmul(F,FT) / M
     return G
@@ -84,7 +84,7 @@ def gram_loss(target_gram, generated, layer_weight=1.0):
     # M = x * y
     M = layer_shape[1] * layer_shape[2]
 
-    F = tf.reshape(generated, shape=[-1, N])
+    F = tf.reshape(generated, shape=[N, -1])
     FT = tf.transpose(F)
     G = tf.matmul(F,FT) / M
 
