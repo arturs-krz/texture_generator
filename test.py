@@ -191,7 +191,7 @@ with tf.device('/gpu:0'):
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
-            feed={init_noise: batch}    
+            feed={init_noise: batch, images: batch1}    
     
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
