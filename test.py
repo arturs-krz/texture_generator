@@ -55,8 +55,12 @@ with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
+        # tex_layers = ['pool4', 'pool3', 'pool2', 'pool1', 'conv1_1']
+        # tex_weights = [1e9,1e9,1e9,1e9,1e9]
         used_layers = [
-            ('conv1_1', 1.0)
+            ('conv1_1', 1.0),
+            ('pool1', 1.0),
+            ('pool2', 1.0)
         ]
         image_path = "data/red.jpg"
 
