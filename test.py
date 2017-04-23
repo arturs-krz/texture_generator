@@ -4,7 +4,8 @@ import tensorflow as tf
 
 # from VGG import vgg16
 # from VGG import utils
-import vgg16
+# import vgg16
+import vgg19
 import utils
 from PIL import Image
 
@@ -54,7 +55,7 @@ with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
-        image_path = "data/gradient.jpg"
+        image_path = "data/red.jpg"
 
         img1 = utils.load_image(image_path)
         batch1 = img1.reshape((1, 224, 224, 3))
@@ -65,7 +66,7 @@ with tf.device('/gpu:0'):
         images = tf.placeholder("float", [1, 224, 224, 3])
         # feed_dict = {images: batch1}
 
-        vgg_ref = vgg16.Vgg16()
+        vgg_ref = vgg19.Vgg19()
         with tf.name_scope("content_vgg"):
             vgg_ref.build(images)
  
@@ -133,7 +134,7 @@ with tf.device('/gpu:0'):
             result = conv1
             tf.summary.image('Output image', result)
 
-        vgg = vgg16.Vgg16()
+        vgg = vgg19.Vgg19()
         with tf.name_scope("content_vgg"):            
             vgg.build(result)
 

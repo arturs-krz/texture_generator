@@ -13,7 +13,7 @@ class Vgg19:
         if vgg19_npy_path is None:
             path = inspect.getfile(Vgg19)
             path = os.path.abspath(os.path.join(path, os.pardir))
-            path = os.path.join(path, "vgg19.npy")
+            path = os.path.join(path, "data/vgg19.npy")
             vgg19_npy_path = path
             print(vgg19_npy_path)
 
