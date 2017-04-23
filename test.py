@@ -14,7 +14,7 @@ from utilities import *
 
 
 # layer => shape = {1, width, height, filters}
-def gram_matrix(layer, area, filters):
+def gram_matrix_old(layer, area, filters):
     # Saplacinam slāņa garums x platums vienā dimensijā.
     feature_map = tf.reshape(layer, (area, filters))
     # Reizinam ar savu transponēto matricu
