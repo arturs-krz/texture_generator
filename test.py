@@ -54,7 +54,7 @@ with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
-        image_path = "data/red.jpg"
+        image_path = "data/gradient.jpg"
 
         img1 = utils.load_image(image_path)
         batch1 = img1.reshape((1, 224, 224, 3))
