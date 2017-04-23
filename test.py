@@ -170,10 +170,10 @@ with tf.device('/gpu:0'):
         
         iterations = 1000
         # batch_size = 1
-        batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+        # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
-            
+            batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             # batch = batch1
             feed={init_noise: batch, gold_5_placeholder: gold_conv5_1, gold_3_placeholder: gold_conv3_1, gold_1_placeholder: gold_conv1_1, gold_4_content: gold_conv4_2}    
     
@@ -181,7 +181,7 @@ with tf.device('/gpu:0'):
             summary, loss_value = sess.run([summary_op, loss], feed_dict=feed)
             writer.add_summary(summary, i)
             if i%10 == 0:
-                batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+                # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
