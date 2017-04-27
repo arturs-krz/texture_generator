@@ -39,10 +39,11 @@ def conv(input, num_filters, filter_size, stride_len, activation='leaky_relu', n
         output = tf.nn.conv2d(
             input=input, 
             filter=weights, 
-            strides=[1, stride_len, stride_len, 1]
+            strides=[1, stride_len, stride_len, 1],
+            padding="SAME"
         )
         # output = instance_norm(output)
-        output = spatial_batch_norm(output)
+        output = spatial_batch_norm(tf.nn.bias_add(output, bias))
         
         tf.summary.histogram('conv_output', output)
 
