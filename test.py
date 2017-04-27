@@ -98,10 +98,35 @@ with tf.device('/gpu:0'):
 
         with tf.name_scope('generator'):
             # Starting data - random 4x4 noise (x3 color channels)
-            # init_noise = tf.placeholder("float", shape=[1, 224, 224, 3])
 
-            init_noise = tf.placeholder("float", shape=[1,28,28,3])
-            tf.summary.image('Init noise', init_noise)
+            # Uļjanova arhitektūra
+            init_noise = [
+                tf.placeholder("float", shape=[1,14,14,3]),
+                tf.placeholder("float", shape=[1,28,28,3]),
+                tf.placeholder("float", shape=[1,56,56,3]),
+                tf.placeholder("float", shape=[1,112,112,3]), 
+                tf.placeholder("float", shape=[1,224,224,3]), 
+            ] 
+
+            current_aggregate = init_noise[0]
+            current_channels = 8
+            for noise_layer in init_noise[1:]:  # skip first
+                low_conv1 = conv(current_aggregate, current_channels, 3, 1)
+                low_conv2 = conv(low_conv1, current_channels, 3, 1)
+                low_conv3 = conv(low_conv2, current_channels, 1, 1)
+
+                high_conv1 = conv(noise_layer, 8, 3, 1)
+                high_conv2 = conv(high_conv1, 8, 3, 1)
+                high_conv3 = conv(high_conv2, 8, 1, 1)
+
+                current_channels += 8
+                current_aggregate = join_resolutions(low_conv3, high_conv3)
+                
+            result_conv1 = conv(current_aggregate, 3, 3, 1)
+            result_conv2 = conv(result_conv1, 3, 3, 1)
+            result_conv3 = conv(result_conv2, 3, 1, 1)
+
+            result = conv(result_conv3, 3, 1, 1)
 
             # h1 = conv(init_noise, 9, 9, 2, name="gen_conv1")
             # print(h1)
@@ -127,25 +152,25 @@ with tf.device('/gpu:0'):
 
             # result = h3
             # result = conv(h1, 3, 3, 1, name='gen_conv')
-            transpose1 = conv_transpose(init_noise, 9, 7, 4, name='gen_transpose1')
+            # transpose1 = conv_transpose(init_noise, 9, 7, 4, name='gen_transpose1')
             # tf.summary.image('First layer', transpose1)
 
-            transpose2 = conv_transpose(transpose1, 6, 3, 2, name='gen_transpose2')
+            # transpose2 = conv_transpose(transpose1, 6, 3, 2, name='gen_transpose2')
             # tf.summary.image('Second layer', transpose2)
 
             # transpose3 = conv_transpose(transpose2, 3, 4, 2, name='gen_transpose3')
             # tf.summary.image('Third layer', transpose3)
 
-            conv1 = conv(transpose2, 3, 3, 1, name='gen_conv1')
+            # conv1 = conv(transpose2, 3, 3, 1, name='gen_conv1')
 
-            print(transpose1)
-            print(transpose2)
+            # print(transpose1)
+            # print(transpose2)
             # print(transpose3)
             # print(conv1)
             # conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
 
             # transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
-            result = conv1
+            # result = conv1
             tf.summary.image('Output image', result)
 
         vgg = vgg19.Vgg19()
@@ -164,21 +189,23 @@ with tf.device('/gpu:0'):
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
         # loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
         total_loss = tf.zeros([])
-        total_grad = tf.zeros([])
+        # total_grad = tf.zeros([])
         for layer in used_layers:
-            loss, grad = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
+            loss = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
             total_loss += loss
-            total_grad += grad
+        #     total_grad += grad
+
+        
 
         # alpha - training rate
         alpha = 0.001
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
-        opt_func = tf.train.AdamOptimizer(alpha)
-        tvars = tf.trainable_variables()
-        t_vars = [var for var in tvars if 'gen_' in var.name]
+        opt_func = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
+        t_vars = tf.trainable_variables()
+        # t_vars = [var for var in tvars if 'gen_' in var.name]
 
-        grads, _ = tf.clip_by_global_norm(tf.gradients(total_grad, t_vars), 1)
+        grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
         train_step = opt_func.apply_gradients(zip(grads, t_vars))
 
         tf.summary.scalar('loss', total_loss)
@@ -191,7 +218,15 @@ with tf.device('/gpu:0'):
         
         iterations = 1000
         # batch_size = 1
-        batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+        # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+        batch = [
+            np.random.rand(1, 14, 14, 3),
+            np.random.rand(1, 28, 28, 3),
+            np.random.rand(1, 56, 56, 3),
+            np.random.rand(1, 112, 112, 3),
+            np.random.rand(1, 224, 224, 3)
+        ]
+
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
@@ -201,14 +236,20 @@ with tf.device('/gpu:0'):
             summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
             writer.add_summary(summary, i)
             if i%10 == 0:
-                batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+                batch = [
+                    np.random.rand(1, 14, 14, 3),
+                    np.random.rand(1, 28, 28, 3),
+                    np.random.rand(1, 56, 56, 3),
+                    np.random.rand(1, 112, 112, 3),
+                    np.random.rand(1, 224, 224, 3)
+                ]
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        img = result.eval(session=sess, feed_dict={init_noise: (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)})
+        # img = result.eval(session=sess, feed_dict={init_noise: (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)})
         # img = result.eval(session=sess)
-        img = Image.fromarray(np.asarray(img)[0], "RGB")
-        img.save('output/result.bmp')
+        # img = Image.fromarray(np.asarray(img)[0], "RGB")
+        # img.save('output/result.bmp')
         # img.show()
           
           # ------
