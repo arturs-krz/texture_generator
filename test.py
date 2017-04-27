@@ -59,10 +59,12 @@ with tf.device('/gpu:0'):
         # tex_weights = [1e9,1e9,1e9,1e9,1e9]
         used_layers = [
             ('conv1_1', 1.0),
-            ('pool1', 1.0),
-            ('pool2', 1.0)
+            ('conv2_1', 1.0),
+            ('conv3_1', 1.0),
+            ('conv4_1', 1.0),
+            ('conv5_1', 1.0)
         ]
-        image_path = "data/red.jpg"
+        image_path = "data/pebbles.jpg"
 
         img1 = utils.load_image(image_path)
         batch1 = img1.reshape((1, 224, 224, 3))
@@ -216,7 +218,7 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 1000
+        iterations = 1500
         # batch_size = 1
         # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
         # batch = [
