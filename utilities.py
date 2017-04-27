@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 def leaky_relu(input, alpha):
-    return tf.maximum(tf.mul(input, alpha), input)
+    return tf.maximum(tf.multiply(input, alpha), input)
 
 # shape = [size, size, in_channels, out_channels]
 def weight_var(shape, glorot=True):
