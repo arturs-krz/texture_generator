@@ -134,6 +134,6 @@ def spatial_batch_norm(input_layer, name='spatial_batch_norm'):
 
 def join_resolutions(low, high):
     # resize low res image to higher res size
-    lower_norm = spatial_batch_norm(tf.image.resize_nearest_neighbor(low, high.get_shape().as_list[1:3]))
+    lower_norm = spatial_batch_norm(tf.image.resize_nearest_neighbor(low, high.get_shape().as_list()[1:3]))
     higher_norm = spatial_batch_norm(high)
     return tf.concat([lower_norm, higher_norm], 3)
