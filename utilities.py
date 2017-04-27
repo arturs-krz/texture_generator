@@ -129,7 +129,7 @@ def spatial_batch_norm(input_layer, name='spatial_batch_norm'):
     num_channels = input_layer.get_shape().as_list()[3]
     scale = tf.Variable(tf.random_uniform([num_channels]))
     offset = tf.Variable(tf.random_uniform([num_channels]))
-    return_val = tf.sub(tf.mul(tf.mul(scale, inv), tf.sub(input_layer, mean)), offset)
+    return_val = tf.subtract(tf.multiply(tf.multiply(scale, inv), tf.subtract(input_layer, mean)), offset)
     return return_val
 
 def join_resolutions(low, high):
