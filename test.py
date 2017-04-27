@@ -219,30 +219,32 @@ with tf.device('/gpu:0'):
         iterations = 1000
         # batch_size = 1
         # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
-        batch = [
-            np.random.rand(1, 14, 14, 3),
-            np.random.rand(1, 28, 28, 3),
-            np.random.rand(1, 56, 56, 3),
-            np.random.rand(1, 112, 112, 3),
-            np.random.rand(1, 224, 224, 3)
-        ]
+        # batch = [
+        #     np.random.rand(1, 14, 14, 3),
+        #     np.random.rand(1, 28, 28, 3),
+        #     np.random.rand(1, 56, 56, 3),
+        #     np.random.rand(1, 112, 112, 3),
+        #     np.random.rand(1, 224, 224, 3)
+        # ]
 
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
-            feed={init_noise: batch, images: batch1}    
+            batch = [
+                np.random.rand(1, 14, 14, 3),
+                np.random.rand(1, 28, 28, 3),
+                np.random.rand(1, 56, 56, 3),
+                np.random.rand(1, 112, 112, 3),
+                np.random.rand(1, 224, 224, 3)
+            ]
+            feed={images: batch1}
+            for index, layer in enumerate(init_noise):
+                feed[layer] = batch[index]
     
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
             writer.add_summary(summary, i)
             if i%10 == 0:
-                batch = [
-                    np.random.rand(1, 14, 14, 3),
-                    np.random.rand(1, 28, 28, 3),
-                    np.random.rand(1, 56, 56, 3),
-                    np.random.rand(1, 112, 112, 3),
-                    np.random.rand(1, 224, 224, 3)
-                ]
                 print("Iteration #{}: loss = {}".format(i, loss_value))
           
         # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
