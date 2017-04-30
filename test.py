@@ -64,7 +64,7 @@ with tf.device('/gpu:0'):
             ('conv4_1', 1.0),
             ('conv5_1', 1.0)
         ]
-        image_path = "data/vangogh.jpg"
+        image_path = "data/grass.jpg"
 
         img1 = utils.load_image(image_path)
         target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
@@ -130,29 +130,11 @@ with tf.device('/gpu:0'):
 
             result = conv(result_conv3, 3, 1, 1)
 
-            tf.summary.image('Output image', result * 255.)
+            tf.summary.image('Output image', result)
 
         vgg = vgg19.Vgg19()
         with tf.name_scope("content_vgg"):            
             vgg.build(result)
-
-        # print(vgg.conv5_1.eval(session=sess))
-
-        # loss = get_loss(reference=[gold_3_placeholder], generated=[vgg.conv3_1])
-        
-
-        # loss = get_loss(reference=[gold_1_placeholder, gold_3_placeholder, gold_5_placeholder], generated=[vgg.conv1_2, vgg.conv3_1, vgg.conv5_1])
-        # loss = get_loss(reference=[gold_4_content], generated=[vgg.conv4_2])
-        # Random loss function
-        # loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
-        # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
-        # loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
-        # total_loss = tf.zeros([])
-        # # total_grad = tf.zeros([])
-        # for layer in used_layers:
-        #     loss = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
-        #     total_loss += loss
-        #     total_grad += grad
 
         total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
