@@ -58,13 +58,13 @@ with tf.device('/gpu:0'):
         # tex_layers = ['pool4', 'pool3', 'pool2', 'pool1', 'conv1_1']
         # tex_weights = [1e9,1e9,1e9,1e9,1e9]
         used_layers = [
-            ('conv1_1', 1.0),
-            ('conv2_1', 1.0),
-            ('conv3_1', 1.0),
-            ('conv4_1', 1.0),
-            ('conv5_1', 1.0)
+            ('conv1_1', 1.0)
+            # ('conv2_1', 1.0),
+            # ('conv3_1', 1.0),
+            # ('conv4_1', 1.0),
+            # ('conv5_1', 1.0)
         ]
-        image_path = "data/pebbles.jpg"
+        image_path = "data/red.jpg"
 
         img1 = utils.load_image(image_path)
         batch1 = img1.reshape((1, 224, 224, 3))
