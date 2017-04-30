@@ -146,6 +146,7 @@ with tf.device('/gpu:0'):
     
         tvars = tf.trainable_variables()
         t_vars = [var for var in tvars if 'gen_' in var.name]
+        print("Found {} trainable variables".format(len(t_vars)))
         train_step = optimizer.minimize(total_loss, var_list=t_vars)
 
         # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)

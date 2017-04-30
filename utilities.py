@@ -40,7 +40,8 @@ def conv(input, num_filters, filter_size, stride_len, activation='leaky_relu', n
             input=input, 
             filter=weights, 
             strides=[1, stride_len, stride_len, 1],
-            padding="SAME"
+            padding="SAME",
+            name=name
         )
         # output = instance_norm(output)
         output = spatial_batch_norm(tf.nn.bias_add(output, bias))
