@@ -64,20 +64,20 @@ with tf.device('/gpu:0'):
             ('conv4_1', 1.0),
             ('conv5_1', 1.0)
         ]
-        image_path = "data/pebbles.jpg"
+        image_path = "data/vangogh.jpg"
 
         img1 = utils.load_image(image_path)
-        batch1 = img1.reshape((1, 224, 224, 3)) / 255.
+        target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
 
         input_ref = utils.load_image(image_path, 28).reshape((1, 28, 28, 3))
         
         # batch = np.concatenate((batch1, batch2), 0)
-        images = tf.placeholder("float", [1, 224, 224, 3])
+        # images = tf.placeholder("float", [1, 224, 224, 3])
         # feed_dict = {images: batch1}
 
         vgg_ref = vgg19.Vgg19()
         with tf.name_scope("content_vgg"):
-            vgg_ref.build(images)
+            vgg_ref.build(target_image)
  
         # target_grams = [sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1 }) for layer in used_layers]
         target_grams = {}
@@ -204,7 +204,7 @@ with tf.device('/gpu:0'):
                 np.random.rand(1, 112, 112, 3),
                 np.random.rand(1, 224, 224, 3)
             ]
-            feed={images: batch1}
+            feed={}
             for index, layer in enumerate(init_noise):
                 feed[layer] = batch[index]
     

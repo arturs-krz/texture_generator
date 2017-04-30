@@ -97,8 +97,8 @@ def gram_matrix(activation_layer):
     # M = x * y
     # M = layer_shape[2] * layer_shape[3]
 
-    F = tf.reshape(activation_layer, shape=[layer_shape[0], N, -1])
-    FT = tf.transpose(F, perm=[0, 2, 1])
+    F = tf.reshape(activation_layer, shape=[N, -1])
+    FT = tf.transpose(F, perm=[1, 0])
     # G = tf.matmul(F,FT) / M
     G = tf.matmul(F, FT)
     return G
