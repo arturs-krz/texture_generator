@@ -67,7 +67,7 @@ with tf.device('/gpu:0'):
         image_path = "data/pebbles.jpg"
 
         img1 = utils.load_image(image_path)
-        batch1 = img1.reshape((1, 224, 224, 3))
+        batch1 = img1.reshape((1, 224, 224, 3)) / 255.
 
         input_ref = utils.load_image(image_path, 28).reshape((1, 28, 28, 3))
         
@@ -130,50 +130,7 @@ with tf.device('/gpu:0'):
 
             result = conv(result_conv3, 3, 1, 1)
 
-            # h1 = conv(init_noise, 9, 9, 2, name="gen_conv1")
-            # print(h1)
-            # tf.summary.image('First layer', h1)
-
-            # h2 = conv(h1, 3, 5, 1, name="gen_conv2")
-            # print(h2)
-            # tf.summary.image('Second layer', h2)
-
-            # h3 = conv(h2, 3, 3, 1, name="gen_conv3")
-            # print(h3)
-            # conv1 = conv(init_noise, 32, 9, 1, activation='relu', name='gen_conv1')
-            # conv2 = conv(conv1, 64, 3, 2, activation='relu', name='gen_conv2')
-            # conv3 = conv(conv2, 128, 3, 2, activation='relu', name='gen_conv3')
-
-            # residual1 = residual_conv(conv3, 3, name='gen_residual1')
-            # residual2 = residual_conv(residual1, 3, name='gen_residual2')
-            # residual3 = residual_conv(residual2, 3, name='gen_residual3')
-
-            # transpose1 = conv_transpose(residual3, 64, 3, 2, name='gen_transpose1')
-            # transpose2 = conv_transpose(transpose1, 32, 3, 2, name='gen_transpose2')
-            # transpose3 = conv_transpose(transpose2, 3, 3, 1, name='gen_transpose3')
-
-            # result = h3
-            # result = conv(h1, 3, 3, 1, name='gen_conv')
-            # transpose1 = conv_transpose(init_noise, 9, 7, 4, name='gen_transpose1')
-            # tf.summary.image('First layer', transpose1)
-
-            # transpose2 = conv_transpose(transpose1, 6, 3, 2, name='gen_transpose2')
-            # tf.summary.image('Second layer', transpose2)
-
-            # transpose3 = conv_transpose(transpose2, 3, 4, 2, name='gen_transpose3')
-            # tf.summary.image('Third layer', transpose3)
-
-            # conv1 = conv(transpose2, 3, 3, 1, name='gen_conv1')
-
-            # print(transpose1)
-            # print(transpose2)
-            # print(transpose3)
-            # print(conv1)
-            # conv2 = conv(conv1, 3, 3, 1, name='gen_conv2')
-
-            # transpose3 = conv_transpose(transpose2, 3, 3, 2, name='gen_transpose3')
-            # result = conv1
-            tf.summary.image('Output image', result)
+            tf.summary.image('Output image', result * 255.)
 
         vgg = vgg19.Vgg19()
         with tf.name_scope("content_vgg"):            
