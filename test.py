@@ -112,23 +112,23 @@ with tf.device('/gpu:0'):
 
             current_aggregate = init_noise[0]
             current_channels = 8
-            for noise_layer in init_noise[1:]:  # skip first
-                low_conv1 = conv(current_aggregate, current_channels, 3, 1)
-                low_conv2 = conv(low_conv1, current_channels, 3, 1)
-                low_conv3 = conv(low_conv2, current_channels, 1, 1)
+            for index, noise_layer in enumerate(init_noise[1:]):  # skip first
+                low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index))
+                low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index))
+                low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index))
 
-                high_conv1 = conv(noise_layer, 8, 3, 1)
-                high_conv2 = conv(high_conv1, 8, 3, 1)
-                high_conv3 = conv(high_conv2, 8, 1, 1)
+                high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index))
+                high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index))
+                high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index))
 
                 current_channels += 8
                 current_aggregate = join_resolutions(low_conv3, high_conv3)
                 
-            result_conv1 = conv(current_aggregate, 3, 3, 1)
-            result_conv2 = conv(result_conv1, 3, 3, 1)
-            result_conv3 = conv(result_conv2, 3, 1, 1)
+            result_conv1 = conv(current_aggregate, 3, 3, 1, name='gen_result_1')
+            result_conv2 = conv(result_conv1, 3, 3, 1, name='gen_result_2')
+            result_conv3 = conv(result_conv2, 3, 1, 1, name='gen_result_3')
 
-            result = conv(result_conv3, 3, 1, 1)
+            result = conv(result_conv3, 3, 1, 1, name='gen_final')
 
             tf.summary.image('Output image', result)
 
@@ -143,9 +143,10 @@ with tf.device('/gpu:0'):
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
         optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
-        train_step = optimizer.minimize(total_loss)
-        # t_vars = tf.trainable_variables()
-        # t_vars = [var for var in tvars if 'gen_' in var.name]
+    
+        tvars = tf.trainable_variables()
+        t_vars = [var for var in tvars if 'gen_' in var.name]
+        train_step = optimizer.minimize(total_loss, var_list=t_vars)
 
         # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
         # train_step = opt_func.apply_gradients(zip(grads, t_vars))
@@ -172,20 +173,20 @@ with tf.device('/gpu:0'):
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
-            # batch = [
-            #     np.random.uniform(64., 192., (1, 14, 14, 3)),
-            #     np.random.uniform(64., 192., (1, 28, 28, 3)),
-            #     np.random.uniform(64., 192., (1, 56, 56, 3)),
-            #     np.random.uniform(64., 192., (1, 112, 112, 3)),
-            #     np.random.uniform(64., 192., (1, 224, 224, 3))
-            # ]
             batch = [
-                np.random.rand(1, 14, 14, 3),
-                np.random.rand(1, 28, 28, 3),
-                np.random.rand(1, 56, 56, 3),
-                np.random.rand(1, 112, 112, 3),
-                np.random.rand(1, 224, 224, 3)
+                np.random.uniform(0., 255., (1, 14, 14, 3)),
+                np.random.uniform(0., 255., (1, 28, 28, 3)),
+                np.random.uniform(0., 255., (1, 56, 56, 3)),
+                np.random.uniform(0., 255., (1, 112, 112, 3)),
+                np.random.uniform(0., 255., (1, 224, 224, 3))
             ]
+            # batch = [
+            #     np.random.rand(1, 14, 14, 3),
+            #     np.random.rand(1, 28, 28, 3),
+            #     np.random.rand(1, 56, 56, 3),
+            #     np.random.rand(1, 112, 112, 3),
+            #     np.random.rand(1, 224, 224, 3)
+            # ]
             feed={}
             for index, layer in enumerate(init_noise):
                 feed[layer] = batch[index]
@@ -195,8 +196,11 @@ with tf.device('/gpu:0'):
             writer.add_summary(summary, i)
             if i%10 == 0:
                 print("Iteration #{}: loss = {}".format(i, loss_value))
-            if i%100 == 0:
+            if i%50 == 0:
                 img = result.eval(session=sess, feed_dict=feed)
                 img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
                 img.save('output/output-%d.bmp' % i)
           
+          img = result.eval(session=sess, feed_dict=feed)
+          img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
+          img.save('output/output-final.bmp' % i)
