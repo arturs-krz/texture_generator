@@ -173,20 +173,20 @@ with tf.device('/gpu:0'):
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
-            batch = [
-                np.random.uniform(0., 255., (1, 14, 14, 3)),
-                np.random.uniform(0., 255., (1, 28, 28, 3)),
-                np.random.uniform(0., 255., (1, 56, 56, 3)),
-                np.random.uniform(0., 255., (1, 112, 112, 3)),
-                np.random.uniform(0., 255., (1, 224, 224, 3))
-            ]
             # batch = [
-            #     np.random.rand(1, 14, 14, 3),
-            #     np.random.rand(1, 28, 28, 3),
-            #     np.random.rand(1, 56, 56, 3),
-            #     np.random.rand(1, 112, 112, 3),
-            #     np.random.rand(1, 224, 224, 3)
+            #     np.random.uniform(0., 255., (1, 14, 14, 3)),
+            #     np.random.uniform(0., 255., (1, 28, 28, 3)),
+            #     np.random.uniform(0., 255., (1, 56, 56, 3)),
+            #     np.random.uniform(0., 255., (1, 112, 112, 3)),
+            #     np.random.uniform(0., 255., (1, 224, 224, 3))
             # ]
+            batch = [
+                np.random.rand(1, 14, 14, 3),
+                np.random.rand(1, 28, 28, 3),
+                np.random.rand(1, 56, 56, 3),
+                np.random.rand(1, 112, 112, 3),
+                np.random.rand(1, 224, 224, 3)
+            ]
             feed={}
             for index, layer in enumerate(init_noise):
                 feed[layer] = batch[index]
