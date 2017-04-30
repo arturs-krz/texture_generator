@@ -197,7 +197,7 @@ with tf.device('/gpu:0'):
             total_loss += loss
         #     total_grad += grad
 
-        total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=1.0=layer[1]) for layer in used_layers]), len(used_layers))
+        total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
         # alpha - training rate
         alpha = 0.01
