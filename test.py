@@ -201,6 +201,6 @@ with tf.device('/gpu:0'):
                 img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
                 img.save('output/output-%d.bmp' % i)
           
-          img = result.eval(session=sess, feed_dict=feed)
-          img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
-          img.save('output/output-final.bmp' % i)
+        img = result.eval(session=sess, feed_dict=feed)
+        img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
+        img.save('output/output-final.bmp' % i)
