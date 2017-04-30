@@ -234,11 +234,11 @@ with tf.device('/gpu:0'):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
             batch = [
-                np.random.uniform(-20., 20., (1, 14, 14, 3)),
-                np.random.uniform(-20., 20., (1, 28, 28, 3)),
-                np.random.uniform(-20., 20., (1, 56, 56, 3)),
-                np.random.uniform(-20., 20., (1, 112, 112, 3)),
-                np.random.uniform(-20., 20., (1, 224, 224, 3))
+                np.random.uniform(64., 192., (1, 14, 14, 3)),
+                np.random.uniform(64., 192., (1, 28, 28, 3)),
+                np.random.uniform(64., 192., (1, 56, 56, 3)),
+                np.random.uniform(64., 192., (1, 112, 112, 3)),
+                np.random.uniform(64., 192., (1, 224, 224, 3))
             ]
             feed={images: batch1}
             for index, layer in enumerate(init_noise):
@@ -247,8 +247,9 @@ with tf.device('/gpu:0'):
             train_step.run(session=sess, feed_dict=feed)
             summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
             writer.add_summary(summary, i)
-            if i%50 == 0:
+            if i%10 == 0:
                 print("Iteration #{}: loss = {}".format(i, loss_value))
+            if i%100 == 0:
                 img = result.eval(session=sess, feed_dict=feed)
                 img = Image.fromarray(np.asarray(img)[0], "RGB")
                 img.save('output/output-%d.bmp' % i)
