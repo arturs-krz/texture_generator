@@ -88,32 +88,33 @@ def instance_norm(input):
     return scale * normalized + shift    
 
 def gram_matrix(activation_layer):
+    # shuffled - batch x channels x width x height
+    shuffled = tf.transpose(activation_layer, perm=[0, 3, 1, 2])
     layer_shape = activation_layer.get_shape().as_list()
     
     # N filters / feature maps
-    N = layer_shape[3]
+    N = layer_shape[1]
     # M = x * y
-    M = layer_shape[1] * layer_shape[2]
+    # M = layer_shape[2] * layer_shape[3]
 
-    F = tf.reshape(activation_layer, shape=[N, -1])
-    FT = tf.transpose(F)
-    G = tf.matmul(F,FT) / M
+    F = tf.reshape(activation_layer, shape=[layer_shape[0], N, -1])
+    FT = tf.transpose(F, perm=[0, 2, 1])
+    # G = tf.matmul(F,FT) / M
+    G = tf.batch_matmul(F, FT)
     return G
 
 
 def gram_loss(target_gram, generated, layer_weight=1.0):
-    layer_shape = generated.get_shape().as_list()
+    gram_shape = generated.get_shape().as_list()
     # N filters / feature maps
     N = layer_shape[3]
     # M = x * y
-    M = layer_shape[1] * layer_shape[2]
-
-    F = tf.reshape(generated, shape=[N, -1])
-    FT = tf.transpose(F)
-    G = tf.matmul(F,FT) / M
+    M = layer_shape[2] * layer_shape[3]
+    G = gram_matrix(generated)
 
     gram_diff = G - target_gram
-    loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
+    # loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
+    loss = tf.divide(tf.reduce_sum(tf.pow(gram_diff, 2)), 4 * (N ** 2) * (M ** 2))
     # gradient = tf.reshape(layer_weight * tf.transpose(tf.matmul(FT, gram_diff)) / (M * N**2), shape=layer_shape)
     # return [loss, gradient]
     return loss

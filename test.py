@@ -197,18 +197,19 @@ with tf.device('/gpu:0'):
             total_loss += loss
         #     total_grad += grad
 
-        
+        total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=1.0=layer[1]) for layer in used_layers]), len(used_layers))
 
         # alpha - training rate
-        alpha = 0.001
+        alpha = 0.01
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
         # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
-        opt_func = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
-        t_vars = tf.trainable_variables()
+        optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
+        train_step = optimizer.minimize(total_loss)
+        # t_vars = tf.trainable_variables()
         # t_vars = [var for var in tvars if 'gen_' in var.name]
 
-        grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
-        train_step = opt_func.apply_gradients(zip(grads, t_vars))
+        # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
+        # train_step = opt_func.apply_gradients(zip(grads, t_vars))
 
         tf.summary.scalar('loss', total_loss)
         writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
@@ -218,7 +219,7 @@ with tf.device('/gpu:0'):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        iterations = 1500
+        iterations = 1000
         # batch_size = 1
         # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
         # batch = [
