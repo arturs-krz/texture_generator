@@ -11,6 +11,7 @@ NeuralStylePainting/
 output/
 ubergmann_SGAN/
 ulyanov_TextureNets/
+tf_TextureNets/
 VGG/
 data/*.npy
 data/.floyddata

@@ -58,13 +58,13 @@ with tf.device('/gpu:0'):
         # tex_layers = ['pool4', 'pool3', 'pool2', 'pool1', 'conv1_1']
         # tex_weights = [1e9,1e9,1e9,1e9,1e9]
         used_layers = [
-            ('conv1_1', 1.0)
-            # ('conv2_1', 1.0),
-            # ('conv3_1', 1.0),
+            ('conv1_1', 1.0),
+            ('conv2_1', 1.0),
+            ('conv3_1', 1.0)
             # ('conv4_1', 1.0),
             # ('conv5_1', 1.0)
         ]
-        image_path = "data/red.jpg"
+        image_path = "data/pebbles.jpg"
 
         img1 = utils.load_image(image_path)
         batch1 = img1.reshape((1, 224, 224, 3))
@@ -233,12 +233,19 @@ with tf.device('/gpu:0'):
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
+            # batch = [
+            #     np.random.uniform(64., 192., (1, 14, 14, 3)),
+            #     np.random.uniform(64., 192., (1, 28, 28, 3)),
+            #     np.random.uniform(64., 192., (1, 56, 56, 3)),
+            #     np.random.uniform(64., 192., (1, 112, 112, 3)),
+            #     np.random.uniform(64., 192., (1, 224, 224, 3))
+            # ]
             batch = [
-                np.random.uniform(64., 192., (1, 14, 14, 3)),
-                np.random.uniform(64., 192., (1, 28, 28, 3)),
-                np.random.uniform(64., 192., (1, 56, 56, 3)),
-                np.random.uniform(64., 192., (1, 112, 112, 3)),
-                np.random.uniform(64., 192., (1, 224, 224, 3))
+                np.random.rand(1, 14, 14, 3),
+                np.random.rand(1, 28, 28, 3),
+                np.random.rand(1, 56, 56, 3),
+                np.random.rand(1, 112, 112, 3),
+                np.random.rand(1, 224, 224, 3)
             ]
             feed={images: batch1}
             for index, layer in enumerate(init_noise):
@@ -251,54 +258,6 @@ with tf.device('/gpu:0'):
                 print("Iteration #{}: loss = {}".format(i, loss_value))
             if i%100 == 0:
                 img = result.eval(session=sess, feed_dict=feed)
-                img = Image.fromarray(np.asarray(img)[0], "RGB")
+                img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
                 img.save('output/output-%d.bmp' % i)
           
-        # Kad iterācijas izgājušas, uzģenerējam un saglabājam bildi ar esošajām vērtībām
-        # img = result.eval(session=sess, feed_dict={init_noise: (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)})
-        # img = result.eval(session=sess)
-        # img = Image.fromarray(np.asarray(img)[0], "RGB")
-        # img.save('output/result.bmp')
-        # img.show()
-          
-          # ------
-          
-          
-            # if not i%10:    
-            #     print('Iteration #{}: error = {}'.format(i,1 - accuracy.eval(session=sess,feed_dict={
-            #         x: x_batch, gold_y: y_batch, keep_prob: 1.0
-            #     })))
-
-
-
-
-
-
-        # gram = gram_matrix(gold_conv5_2)
-
-        # gram = sess.run([gram], feed_dict=feed_dict)
-        # print(gram)
-        
-        
-
-        # img = generator.run(sess)
-        
-        # generated = generator.result.reshape([1, 224, 224, 3])
-        
-
-        
-        
-
-
-
-
-        # img = Image.fromarray(np.asarray(img)[0], "RGB")
-        # img.show()
-
-        
-        # prob, conv1_1, conv1_2 = sess.run([vgg.prob, vgg.conv1_1, vgg.conv1_2], feed_dict=feed_dict)
-        # gram_matrix(conv1_2)
-        # utils.print_prob(prob[0], './VGG/synset.txt')
-        # utils.print_prob(prob[1], './synset.txt')
-        
-        
