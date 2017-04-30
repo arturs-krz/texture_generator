@@ -62,8 +62,7 @@ with tf.device('/gpu:0'):
             ('conv2_1', 1.0),
             ('conv3_1', 1.0),
             ('conv4_1', 1.0),
-            ('conv5_1', 1.0),
-            ('conv6_1', 1.0)
+            ('conv5_1', 1.0)
         ]
         image_path = "data/pebbles.jpg"
 
