@@ -96,7 +96,7 @@ def gram_matrix(activation_layer):
     # N filters / feature maps
     N = layer_shape[1]
     # M = x * y
-    # M = layer_shape[2] * layer_shape[3]
+    M = layer_shape[2] * layer_shape[3]
 
     F = tf.reshape(activation_layer, shape=[N, -1])
     FT = tf.transpose(F, perm=[1, 0])
