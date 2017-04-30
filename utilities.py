@@ -105,7 +105,7 @@ def gram_matrix(activation_layer):
 
 
 def gram_loss(target_gram, generated, layer_weight=1.0):
-    gram_shape = generated.get_shape().as_list()
+    layer_shape = generated.get_shape().as_list()
     # N filters / feature maps
     N = layer_shape[3]
     # M = x * y
