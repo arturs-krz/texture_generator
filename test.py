@@ -234,11 +234,11 @@ with tf.device('/gpu:0'):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
             batch = [
-                np.random.rand(1, 14, 14, 3),
-                np.random.rand(1, 28, 28, 3),
-                np.random.rand(1, 56, 56, 3),
-                np.random.rand(1, 112, 112, 3),
-                np.random.rand(1, 224, 224, 3)
+                np.random.uniform(-20., 20., (1, 14, 14, 3)),
+                np.random.uniform(-20., 20., (1, 28, 28, 3)),
+                np.random.uniform(-20., 20., (1, 56, 56, 3)),
+                np.random.uniform(-20., 20., (1, 112, 112, 3)),
+                np.random.uniform(-20., 20., (1, 224, 224, 3))
             ]
             feed={images: batch1}
             for index, layer in enumerate(init_noise):
