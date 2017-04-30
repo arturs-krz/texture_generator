@@ -109,7 +109,7 @@ def gram_loss(target_gram, generated, layer_weight=1.0):
     # N filters / feature maps
     N = layer_shape[3]
     # M = x * y
-    M = layer_shape[2] * layer_shape[3]
+    M = layer_shape[1] * layer_shape[2]
     G = gram_matrix(generated)
 
     gram_diff = G - target_gram
