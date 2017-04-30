@@ -190,11 +190,11 @@ with tf.device('/gpu:0'):
         # loss = tf.reduce_sum(0.5*tf.reduce_mean(tf.pow(gold_5_placeholder - vgg.conv5_1, 2)) + 0.3*tf.reduce_mean(tf.pow(gold_3_placeholder - vgg.conv3_1, 2)) + 0.2*tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_2, 2)))
         # loss = tf.reduce_sum(0.7*layer_loss(gold_3_placeholder,vgg.conv3_1) + 0.3*layer_loss(gold_1_placeholder,vgg.conv1_1))
         # loss = tf.reduce_mean(tf.pow(gold_1_placeholder - vgg.conv1_1, 2))
-        total_loss = tf.zeros([])
-        # total_grad = tf.zeros([])
-        for layer in used_layers:
-            loss = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
-            total_loss += loss
+        # total_loss = tf.zeros([])
+        # # total_grad = tf.zeros([])
+        # for layer in used_layers:
+        #     loss = gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1])
+        #     total_loss += loss
         #     total_grad += grad
 
         total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
