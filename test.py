@@ -135,7 +135,7 @@ with tf.device('/gpu:0'):
             # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
-            alpha = 0.02
+            alpha = 0.01
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
@@ -157,7 +157,7 @@ with tf.device('/gpu:0'):
             init = tf.global_variables_initializer()
             sess.run(init)
             
-            iterations = 1500
+            iterations = 5000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
@@ -196,10 +196,10 @@ with tf.device('/gpu:0'):
                 if i%10 == 0:
                     print("Iteration #{}: loss = {}".format(i, loss_value))
                 if i%50 == 0:
-                    img = result.eval(session=sess, feed_dict=feed)
-                    img = Image.fromarray(np.asarray(img)[0], "RGB")
-                    img.save('output/output-%d.bmp' % i)
+                    img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
+                    img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
+                    skimage.io.imsave("output/iteration-%d.jpeg" % i, img)
             
-            img = result.eval(session=sess, feed_dict=feed)
-            img = Image.fromarray(np.asarray(img)[0], "RGB")
-            img.save('output/output-final.bmp')
+            img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
+            img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
+            skimage.io.imsave("output/final.jpeg", img)
