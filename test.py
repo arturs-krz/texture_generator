@@ -161,7 +161,7 @@ with tf.device('/gpu:0'):
 
             sess.run(init)
             print("Checking for model_{}.ckpt".format(image_name))
-            if os.path.isfile("data/model_{}.ckpt".format(image_name)):
+            if os.path.isfile("data/model_{}.ckpt.index".format(image_name)):
                 print("Loading existing model...")
                 saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
