@@ -130,11 +130,13 @@ def style_loss(layers, target_activations):
     activations = [activations_for_layer(layer) for layer in layers]
     gramians = [gramian_for_layer(layer, target_activations[i]) for i, layer in enumerate(layers)]
 
+    print(gramians)
+
     # Slices are for style and synth image
     gramian_diffs = [
         tf.subtract(
             tf.tile(tf.slice(g, [0, 0, 0], [1, -1, -1]), [1, 1, 1]),
-            tf.slice(g, [0, 0, 0], [1, -1, -1]))
+            tf.slice(g, [1, 0, 0], [1, -1, -1]))
         for g in gramians]
     
     # gramian_diffs = [(target_grams[i] - gram) for i, gram in enumerate(gramians)]
