@@ -71,7 +71,13 @@ with tf.device('/gpu:0'):
         img1 = utils.load_image(image_path)
         target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
 
-        # input_ref = utils.load_image(image_path, 28).reshape((1, 28, 28, 3))
+        input_ref = [
+            utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
+            utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
+            utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
+            utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
+            utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
+        ]
         
         # batch = np.concatenate((batch1, batch2), 0)
         # images = tf.placeholder("float", [1, 224, 224, 3])
@@ -179,20 +185,20 @@ with tf.device('/gpu:0'):
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
-            # batch = [
-            #     np.random.uniform(127.5, 128.5, (1, 14, 14, 3)),
-            #     np.random.uniform(127.5, 128.5, (1, 28, 28, 3)),
-            #     np.random.uniform(127.5, 128.5, (1, 56, 56, 3)),
-            #     np.random.uniform(127.5, 128.5, (1, 112, 112, 3)),
-            #     np.random.uniform(127.5, 128.5, (1, 224, 224, 3))
-            # ]
             batch = [
-                np.random.rand(1, 14, 14, 3),
-                np.random.rand(1, 28, 28, 3),
-                np.random.rand(1, 56, 56, 3),
-                np.random.rand(1, 112, 112, 3),
-                np.random.rand(1, 224, 224, 3)
+                (0.6 * np.random.uniform(-20, 20, (1, 14, 14, 3))) + (0.4 * input_ref[0]),
+                (0.6 * np.random.uniform(-20, 20, (1, 28, 28, 3))) + (0.4 * input_ref[1]),
+                (0.6 * np.random.uniform(-20, 20, (1, 56, 56, 3))) + (0.4 * input_ref[2]),
+                (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
+                (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
             ]
+            # batch = [
+            #     np.random.rand(1, 14, 14, 3),
+            #     np.random.rand(1, 28, 28, 3),
+            #     np.random.rand(1, 56, 56, 3),
+            #     np.random.rand(1, 112, 112, 3),
+            #     np.random.rand(1, 224, 224, 3)
+            # ]
             feed={}
             for index, layer in enumerate(init_noise):
                 feed[layer] = batch[index]
@@ -204,9 +210,9 @@ with tf.device('/gpu:0'):
                 print("Iteration #{}: loss = {}".format(i, loss_value))
             if i%50 == 0:
                 img = result.eval(session=sess, feed_dict=feed)
-                img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
+                img = Image.fromarray(np.clip(np.asarray(img)[0], 0, 255), "RGB")
                 img.save('output/output-%d.bmp' % i)
           
         img = result.eval(session=sess, feed_dict=feed)
-        img = Image.fromarray(np.clip(np.asarray(img)[0] * 255.0, 0, 255), "RGB")
+        img = Image.fromarray(np.clip(np.asarray(img)[0], 0, 255), "RGB")
         img.save('output/output-final.bmp')
