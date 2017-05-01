@@ -115,11 +115,11 @@ with tf.device('/gpu:0'):
             total_loss = tf.divide(tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)]), len(used_layers))
 
             input_ref = [
-                np.clip(utils.load_image(image_path, 14).reshape((1, 14, 14, 3)) / 255., 0., 1.),
-                np.clip(utils.load_image(image_path, 28).reshape((1, 28, 28, 3)) / 255., 0., 1.),
-                np.clip(utils.load_image(image_path, 56).reshape((1, 56, 56, 3)) / 255., 0., 1.),
-                np.clip(utils.load_image(image_path, 112).reshape((1, 112, 112, 3)) / 255., 0., 1.),
-                np.clip(utils.load_image(image_path, 224).reshape((1, 224, 224, 3)) / 255., 0., 1.)
+                utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
+                utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
+                utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
+                utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
+                utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
             ]
 
             # with open("data/vgg16.tfmodel", mode='rb') as f:
