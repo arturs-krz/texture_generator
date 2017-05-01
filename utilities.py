@@ -197,5 +197,5 @@ def activations_for_layer(layer):
     """
     :param layer: A tuple that indexes into the convolutional blocks of the VGG Net
     """
-    return tf.get_default_graph().get_tensor_by_name("vgg/{}/Relu:0".format(layer[0]))
+    return tf.get_default_graph().get_tensor_by_name("generator/vgg/{}/Relu:0".format(layer[0]))
     
