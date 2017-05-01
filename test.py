@@ -4,8 +4,8 @@ import tensorflow as tf
 
 # from VGG import vgg16
 # from VGG import utils
-# import vgg16
-import vgg19
+import vgg16
+# import vgg19
 import utils
 from PIL import Image
 
@@ -102,13 +102,13 @@ with tf.device('/gpu:0'):
 
             img1 = utils.load_image(image_path)
             target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
-            vgg_ref = vgg19.Vgg19()
+            vgg_ref = vgg16.Vgg16()
             with tf.name_scope("content_vgg"):
                 vgg_ref.build(target_image)
 
             target_activations = [sess.run(getattr(vgg_ref, layer[0])) for layer in used_layers]
 
-            vgg = vgg19.Vgg19()
+            vgg = vgg16.Vgg16()
             with tf.name_scope("content_vgg"):            
                 vgg.build(result)
 
