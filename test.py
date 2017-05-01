@@ -133,10 +133,11 @@ with tf.device('/gpu:0'):
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
         
-            tvars = tf.trainable_variables()
-            t_vars = [var for var in tvars if 'gen_' in var.name]
-            print("Found {} trainable variables".format(len(t_vars)))
-            train_step = optimizer.minimize(total_loss, var_list=t_vars)
+            # tvars = tf.trainable_variables()
+            # t_vars = [var for var in tvars if 'gen_' in var.name]
+            # print("Found {} trainable variables".format(len(t_vars)))
+            # train_step = optimizer.minimize(total_loss, var_list=t_vars)
+            train_step = optimizer.minimize(total_loss)
 
             # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
             # train_step = opt_func.apply_gradients(zip(grads, t_vars))
