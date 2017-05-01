@@ -99,7 +99,7 @@ with tf.device('/gpu:0'):
                 ('conv4_1', 1.0),
                 ('conv5_1', 1.0)
             ]
-            image_name = "grass"
+            image_name = "vangogh"
             image_path = "data/{}.jpg".format(image_name)
 
             img1 = utils.load_image(image_path)
@@ -137,7 +137,7 @@ with tf.device('/gpu:0'):
             # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
-            alpha = 0.001
+            alpha = 0.01
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
@@ -165,7 +165,7 @@ with tf.device('/gpu:0'):
                 print("Loading existing model...")
                 saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
-            iterations = 1000
+            iterations = 2000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
