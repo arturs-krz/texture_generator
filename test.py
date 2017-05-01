@@ -120,16 +120,12 @@ with tf.device('/gpu:0'):
             graph_def.ParseFromString(file_content)
             tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg_ref')
             
-            target_grams = [sess.run(gramian_for_layer(layer, ref=True)) for layer in used_layers]
-            print(target_grams)
+            target_activations = [sess.run(activations_for_layer(layer, ref=True)) for layer in used_layers]
 
             tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
             
-            total_loss = style_loss(used_layers, target_grams)
-            print(total_loss)
-
-            print(activations_for_layer(used_layers[1]))
-
+            total_loss = style_loss(used_layers, target_activations)
+            
             # alpha - training rate
             alpha = 0.01
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)

@@ -121,21 +121,21 @@ def gram_loss(target_gram, generated, layer_weight=1.0):
     return loss
 
 
-def style_loss(layers, target_grams):
+def style_loss(layers, target_activations):
     """
     [0:num_style, :, :, :] holds i style images,
     [num_style : num_style+num_content, :, :, :] holds j content images,
     [num_style+num_content : num_style+num_content+num_synth, :, :, :] holds k synthesized images
     """
     activations = [activations_for_layer(layer) for layer in layers]
-    gramians = [gramian_for_layer(layer) for layer in layers]
+    gramians = [gramian_for_layer(layer, target_activations[i]) for i, layer in enumerate(layers)]
 
     # Slices are for style and synth image
     gramian_diffs = [
         tf.subtract(
-            tf.tile(tf.slice(target_grams[i], [0, 0, 0], [1, -1, -1]), [1, 1, 1]),
+            tf.tile(tf.slice(g, [0, 0, 0], [1, -1, -1]), [1, 1, 1]),
             tf.slice(g, [0, 0, 0], [1, -1, -1]))
-        for i,g in enumerate(gramians)]
+        for g in gramians]
     
     # gramian_diffs = [(target_grams[i] - gram) for i, gram in enumerate(gramians)]
 
@@ -183,11 +183,11 @@ def gramian(activations):
     mult = tf.matmul(vectorized_activations, transposed_vectorized_activations)
     return mult
 
-def gramian_for_layer(layer, ref=False):
+def gramian_for_layer(layer, target_layer):
     """
     Returns a matrix of cross-correlations between the activations of convolutional channels in a given layer.
     """
-    activations = activations_for_layer(layer, ref)
+    activations = tf.concat([target_layer, activations_for_layer(layer)], 0)
 
     # Reshape from (batch, width, height, channels) to (batch, channels, width, height)
     shuffled_activations = tf.transpose(activations, perm=[0, 3, 1, 2])
