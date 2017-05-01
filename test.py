@@ -98,7 +98,7 @@ with tf.device('/gpu:0'):
                 ('conv4_1', 1.0),
                 ('conv5_1', 1.0)
             ]
-            image_name = "pebbles"
+            image_name = "grass"
             image_path = "data/{}.jpg".format(image_name)
 
             img1 = utils.load_image(image_path)
