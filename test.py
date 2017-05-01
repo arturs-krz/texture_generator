@@ -124,7 +124,7 @@ with tf.device('/gpu:0'):
             print(target_grams)
 
             tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
-            total_loss = style_loss[]
+            
             total_loss = style_loss(used_layers, target_grams)
             print(total_loss)
 
