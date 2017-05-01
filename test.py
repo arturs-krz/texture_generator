@@ -137,7 +137,7 @@ with tf.device('/gpu:0'):
             # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
-            alpha = 0.01
+            alpha = 0.001
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
@@ -161,9 +161,10 @@ with tf.device('/gpu:0'):
 
             sess.run(init)
             if os.path.isfile("./data/model_{}.ckpt".format(image_name)):
+                print("Loading existing model...")
                 saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
-            iterations = 2000
+            iterations = 1000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
