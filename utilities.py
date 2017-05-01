@@ -105,15 +105,15 @@ def gram_matrix(activation_layer):
 
 
 def gram_loss(target_activation, generated, layer_weight=1.0):
-    layer_shape = generated.get_shape().as_list()
-    # N filters / feature maps
-    N = layer_shape[3]
+    layer_shape = target_activation.get_shape().as_list()
+
     # M = x * y
     M = layer_shape[1] * layer_shape[2]
 
     # shuffle to [batch, channels, width, height]
     activations = tf.transpose(tf.concat([target_activation, generated], 0), perm=[0, 3, 1, 2])
     G = gram_matrix(activations)
+    N = G.get_shape().as_list()[2]
 
     gram_diff = tf.slice(G, [0, 0, 0], [1, -1, -1]) - tf.slice(G, [1, 0, 0], [1, -1, -1])
     # loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
