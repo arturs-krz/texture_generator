@@ -98,7 +98,8 @@ with tf.device('/gpu:0'):
                 ('conv4_1', 1.0),
                 ('conv5_1', 1.0)
             ]
-            image_path = "data/pebbles.jpg"
+            image_name = "pebbles"
+            image_path = "data/{}.jpg".format(image_name)
 
             img1 = utils.load_image(image_path)
             target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
@@ -155,9 +156,12 @@ with tf.device('/gpu:0'):
             summary_op = tf.summary.merge_all()
 
             init = tf.global_variables_initializer()
+            saver = tf.train.Saver()
+
             sess.run(init)
+            saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
-            iterations = 10000
+            iterations = 2000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
@@ -199,6 +203,8 @@ with tf.device('/gpu:0'):
                     img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
                     skimage.io.imsave("output/iteration-%d.jpeg" % i, img)
+
+            saver.save(sess, "data/model_{}.ckpt".format(image_name))
             
             img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
             img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
