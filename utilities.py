@@ -181,6 +181,8 @@ def gramian(activations):
     """
     vectorized_activations = tf.reshape(activations,
                                         [activations_shape[0], activations_shape[1], -1])
+    print(activations)
+    print(vectorized_activations)
     transposed_vectorized_activations = tf.transpose(vectorized_activations, perm=[0, 2, 1])
     mult = tf.matmul(vectorized_activations, transposed_vectorized_activations)
     return mult

@@ -149,7 +149,7 @@ with tf.device('/gpu:0'):
             init = tf.global_variables_initializer()
             sess.run(init)
             
-            iterations = 1000
+            iterations = 2000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
