@@ -88,9 +88,6 @@ with tf.device('/gpu:0'):
 
             tf.summary.image('Output image', result)
 
-            # vgg = vgg19.Vgg19()
-            # with tf.name_scope("content_vgg"):            
-            #     vgg.build(result)
 
             # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
@@ -105,6 +102,17 @@ with tf.device('/gpu:0'):
 
             img1 = utils.load_image(image_path)
             target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
+            vgg_ref = vgg19.Vgg19()
+            with tf.name_scope("content_vgg"):
+                vgg_ref.build(target_image)
+
+            target_activations = [sess.run(getattr(vgg_ref, layer[0])) for layer in used_layers]
+
+            vgg = vgg19.Vgg19()
+            with tf.name_scope("content_vgg"):            
+                vgg.build(result)
+
+            total_loss = tf.divide(tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)]), len(used_layers))
 
             # input_ref = [
             #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
@@ -114,17 +122,17 @@ with tf.device('/gpu:0'):
             #     utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
             # ]
 
-            with open("data/vgg16.tfmodel", mode='rb') as f:
-                file_content = f.read()
-            graph_def = tf.GraphDef()
-            graph_def.ParseFromString(file_content)
-            tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg_ref')
+            # with open("data/vgg16.tfmodel", mode='rb') as f:
+            #     file_content = f.read()
+            # graph_def = tf.GraphDef()
+            # graph_def.ParseFromString(file_content)
+            # tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg_ref')
             
-            target_activations = [sess.run(activations_for_layer(layer, ref=True)) for layer in used_layers]
+            # target_activations = [sess.run(activations_for_layer(layer, ref=True)) for layer in used_layers]
 
-            tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
+            # tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
             
-            total_loss = style_loss(used_layers, target_activations)
+            # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
             alpha = 0.01
