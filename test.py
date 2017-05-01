@@ -114,13 +114,13 @@ with tf.device('/gpu:0'):
 
             total_loss = tf.divide(tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)]), len(used_layers))
 
-            input_ref = [
-                utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
-                utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
-                utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
-                utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
-                utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
-            ]
+            # input_ref = [
+            #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
+            #     utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
+            #     utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
+            #     utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
+            #     utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
+            # ]
 
             # with open("data/vgg16.tfmodel", mode='rb') as f:
             #     file_content = f.read()
@@ -157,7 +157,7 @@ with tf.device('/gpu:0'):
             init = tf.global_variables_initializer()
             sess.run(init)
             
-            iterations = 2000
+            iterations = 10000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
@@ -172,20 +172,20 @@ with tf.device('/gpu:0'):
                 #     (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
                 #     (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
                 # ]
-                # batch = [
-                #     np.random.rand(1, 14, 14, 3),
-                #     np.random.rand(1, 28, 28, 3),
-                #     np.random.rand(1, 56, 56, 3),
-                #     np.random.rand(1, 112, 112, 3),
-                #     np.random.rand(1, 224, 224, 3)
-                # ]
                 batch = [
-                    (0.6 * np.random.rand(1, 14, 14, 3)) + (0.4 * input_ref[0]),
-                    (0.6 * np.random.rand(1, 28, 28, 3)) + (0.4 * input_ref[1]),
-                    (0.6 * np.random.rand(1, 56, 56, 3)) + (0.4 * input_ref[2]),
-                    (0.6 * np.random.rand(1, 112, 112, 3)) + (0.4 * input_ref[3]),
-                    (0.6 * np.random.rand(1, 224, 224, 3)) + (0.4 * input_ref[4])
+                    np.random.rand(1, 14, 14, 3),
+                    np.random.rand(1, 28, 28, 3),
+                    np.random.rand(1, 56, 56, 3),
+                    np.random.rand(1, 112, 112, 3),
+                    np.random.rand(1, 224, 224, 3)
                 ]
+                # batch = [
+                #     (0.6 * np.random.rand(1, 14, 14, 3)) + (0.4 * input_ref[0]),
+                #     (0.6 * np.random.rand(1, 28, 28, 3)) + (0.4 * input_ref[1]),
+                #     (0.6 * np.random.rand(1, 56, 56, 3)) + (0.4 * input_ref[2]),
+                #     (0.6 * np.random.rand(1, 112, 112, 3)) + (0.4 * input_ref[3]),
+                #     (0.6 * np.random.rand(1, 224, 224, 3)) + (0.4 * input_ref[4])
+                # ]
                 feed={}
                 for index, layer in enumerate(init_noise):
                     feed[layer] = batch[index]
