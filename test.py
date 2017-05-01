@@ -103,7 +103,7 @@ with tf.device('/gpu:0'):
             img1 = utils.load_image(image_path)
             target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
             vgg_ref = vgg16.Vgg16()
-            with tf.name_scope("content_vgg"):
+            with tf.name_scope("ref_vgg"):
                 vgg_ref.build(target_image)
 
             target_activations = [sess.run(getattr(vgg_ref, layer[0])) for layer in used_layers]
@@ -135,16 +135,16 @@ with tf.device('/gpu:0'):
             # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
-            alpha = 0.01
+            alpha = 0.02
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
         
-            # tvars = tf.trainable_variables()
-            # t_vars = [var for var in tvars if 'gen_' in var.name]
-            # print("Found {} trainable variables".format(len(t_vars)))
-            # train_step = optimizer.minimize(total_loss, var_list=t_vars)
-            train_step = optimizer.minimize(total_loss)
+            tvars = tf.trainable_variables()
+            t_vars = [var for var in tvars if 'gen_' in var.name]
+            print("Found {} trainable variables".format(len(t_vars)))
+            train_step = optimizer.minimize(total_loss, var_list=t_vars)
+            # train_step = optimizer.minimize(total_loss)
 
             # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
             # train_step = opt_func.apply_gradients(zip(grads, t_vars))
@@ -157,7 +157,7 @@ with tf.device('/gpu:0'):
             init = tf.global_variables_initializer()
             sess.run(init)
             
-            iterations = 1000
+            iterations = 1500
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             

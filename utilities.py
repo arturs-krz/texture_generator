@@ -91,13 +91,10 @@ def instance_norm(input):
 def gram_matrix(activation_layer):
     layer_shape = activation_layer.get_shape().as_list()
     
-    # N filters / feature maps
     batch = layer_shape[0]
-    N = layer_shape[1]
-    # M = x * y
-    # M = layer_shape[2] * layer_shape[3]
-
-    F = tf.reshape(activation_layer, shape=[batch, N, -1])
+    channels = layer_shape[1]
+    
+    F = tf.reshape(activation_layer, shape=[batch, channels, -1])
     FT = tf.transpose(F, perm=[0, 2, 1])
     # G = tf.matmul(F,FT) / M
     G = tf.matmul(F, FT)
