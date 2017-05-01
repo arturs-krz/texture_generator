@@ -93,11 +93,11 @@ with tf.device('/gpu:0'):
             # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
             used_layers = [
-                ('conv1_1', 1.0),
-                ('conv2_1', 1.0),
-                ('conv3_1', 1.0),
-                ('conv4_1', 1.0),
-                ('conv5_1', 1.0)
+                ('conv1_1', 0.10),
+                ('conv2_1', 0.15),
+                ('conv3_1', 0.20),
+                ('conv4_1', 0.25),
+                ('conv5_1', 0.30)
             ]
             image_name = "vangogh"
             image_path = "data/{}.jpg".format(image_name)
@@ -114,7 +114,8 @@ with tf.device('/gpu:0'):
             with tf.name_scope("content_vgg"):            
                 vgg.build(result)
 
-            total_loss = tf.divide(tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)]), len(used_layers))
+            # total_loss = tf.divide(tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)]), len(used_layers))
+            total_loss = tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)])
 
             # input_ref = [
             #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
@@ -137,7 +138,7 @@ with tf.device('/gpu:0'):
             # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
-            alpha = 0.01
+            alpha = 0.001
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
