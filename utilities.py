@@ -183,19 +183,19 @@ def gramian(activations):
     mult = tf.matmul(vectorized_activations, transposed_vectorized_activations)
     return mult
 
-def gramian_for_layer(layer):
+def gramian_for_layer(layer, ref=False):
     """
     Returns a matrix of cross-correlations between the activations of convolutional channels in a given layer.
     """
-    activations = activations_for_layer(layer)
+    activations = activations_for_layer(layer, ref)
 
     # Reshape from (batch, width, height, channels) to (batch, channels, width, height)
     shuffled_activations = tf.transpose(activations, perm=[0, 3, 1, 2])
     return gramian(shuffled_activations)
 
-def activations_for_layer(layer):
+def activations_for_layer(layer, ref=False):
     """
     :param layer: A tuple that indexes into the convolutional blocks of the VGG Net
     """
-    return tf.get_default_graph().get_tensor_by_name("generator/vgg/{}/Relu:0".format(layer[0]))
+    return tf.get_default_graph().get_tensor_by_name("generator/{}/{}/Relu:0".format('vgg_ref' if ref else 'vgg', layer[0]))
     

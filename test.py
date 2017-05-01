@@ -118,9 +118,9 @@ with tf.device('/gpu:0'):
                 file_content = f.read()
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(file_content)
-            tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
+            tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg_ref')
             
-            target_grams = [sess.run(gramian_for_layer(layer)) for layer in used_layers]
+            target_grams = [sess.run(gramian_for_layer(layer, ref=True)) for layer in used_layers]
             print(target_grams)
 
             tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
