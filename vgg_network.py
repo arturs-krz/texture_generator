@@ -65,6 +65,11 @@ class VGGNetwork(object):
         return tf.get_default_graph().get_tensor_by_name("{0}/conv{1}_{2}/Relu:0".format(self.name, layer[0], layer[1]))
 
     def style_loss(self, layers):
+        """
+        [0:num_style, :, :, :] holds i style images,
+        [num_style : num_style+num_content, :, :, :] holds j content images,
+        [num_style+num_content : num_style+num_content+num_synth, :, :, :] holds k synthesized images
+        """
         activations = [self.activations_for_layer(i) for i in layers]
         gramians = [self.gramian_for_layer(x) for x in layers]
         # Slices are for style and synth image

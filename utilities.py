@@ -120,6 +120,36 @@ def gram_loss(target_gram, generated, layer_weight=1.0):
     # return [loss, gradient]
     return loss
 
+
+def style_loss(layers, target_grams):
+    """
+    [0:num_style, :, :, :] holds i style images,
+    [num_style : num_style+num_content, :, :, :] holds j content images,
+    [num_style+num_content : num_style+num_content+num_synth, :, :, :] holds k synthesized images
+    """
+    activations = [activations_for_layer(layer) for layer in layers]
+    
+    # Slices are for style and synth image
+    # gramian_diffs = [
+    #     tf.subtract(
+    #         tf.tile(tf.slice(g, [0, 0, 0], [self.num_style, -1, -1]), [self.num_synthesized - self.num_style + 1, 1, 1]),
+    #         tf.slice(g, [self.num_style + self.num_content, 0, 0], [self.num_synthesized, -1, -1]))
+    #     for g in gramians]
+    
+    gramians = [gramian_for_layer(layer) for layer in layers]
+    gramian_diffs = [(target_grams[i] - gram) for i, gram in enumerate(gramians)]
+
+    Ns = [g.get_shape().as_list()[2] for g in gramians]
+    Ms = [a.get_shape().as_list()[1] * a.get_shape().as_list()[2] for a in activations]
+    scaled_diffs = [tf.square(g) for g in gramian_diffs]
+    style_loss = tf.divide(
+        tf.add_n([tf.divide(tf.reduce_sum(x), 4 * (N ** 2) * (M ** 2)) for x, N, M in zip(scaled_diffs, Ns, Ms)]),
+        len(layers))
+    return style_loss
+
+
+
+
 def spatial_batch_norm(input_layer, name='spatial_batch_norm'):
     """
     Batch-normalizes the layer as in http://arxiv.org/abs/1502.03167
@@ -139,3 +169,33 @@ def join_resolutions(low, high):
     lower_norm = spatial_batch_norm(tf.image.resize_nearest_neighbor(low, high.get_shape().as_list()[1:3]))
     higher_norm = spatial_batch_norm(high)
     return tf.concat([lower_norm, higher_norm], 3)
+
+def gramian(activations):
+    # Takes (batches, channels, width, height) and computes gramians of dimension (batches, channels, channels)
+    activations_shape = activations.get_shape().as_list()
+    """
+    Instead of iterating over #channels width by height matrices and computing similarity, we vectorize and compute
+    the entire gramian in a single matrix multiplication.
+    """
+    vectorized_activations = tf.reshape(activations,
+                                        [activations_shape[0], activations_shape[1], -1])
+    transposed_vectorized_activations = tf.transpose(vectorized_activations, perm=[0, 2, 1])
+    mult = tf.matmul(vectorized_activations, transposed_vectorized_activations)
+    return mult
+
+def gramian_for_layer(layer):
+    """
+    Returns a matrix of cross-correlations between the activations of convolutional channels in a given layer.
+    """
+    activations = activations_for_layer(layer)
+
+    # Reshape from (batch, width, height, channels) to (batch, channels, width, height)
+    shuffled_activations = tf.transpose(activations, perm=[0, 3, 1, 2])
+    return gramian(shuffled_activations)
+
+def activations_for_layer(layer):
+    """
+    :param layer: A tuple that indexes into the convolutional blocks of the VGG Net
+    """
+    return tf.get_default_graph().get_tensor_by_name("vgg/{}/Relu:0".format(layer[0]))
+    

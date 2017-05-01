@@ -56,55 +56,6 @@ def get_loss(reference, generated):
 with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        
-        # tex_layers = ['pool4', 'pool3', 'pool2', 'pool1', 'conv1_1']
-        # tex_weights = [1e9,1e9,1e9,1e9,1e9]
-        used_layers = [
-            ('conv1_1', 1.0),
-            ('conv2_1', 1.0),
-            ('conv3_1', 1.0),
-            ('conv4_1', 1.0),
-            ('conv5_1', 1.0)
-        ]
-        image_path = "data/pebbles.jpg"
-
-        img1 = utils.load_image(image_path)
-        target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
-
-        input_ref = [
-            utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
-            utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
-            utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
-            utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
-            utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
-        ]
-        
-        # batch = np.concatenate((batch1, batch2), 0)
-        # images = tf.placeholder("float", [1, 224, 224, 3])
-        # feed_dict = {images: batch1}
-
-        # vgg_ref = vgg19.Vgg19()
-        # with tf.name_scope("content_vgg"):
-        #     vgg_ref.build(target_image)
- 
-        
-        # target_grams = {}
-        # for layer in used_layers:
-        #     # target_grams[layer[0]] = sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1})
-        #     target_grams[layer[0]] = gram_matrix(getattr(vgg_ref, layer[0]))
-
-
-        # gold_conv5_1, gold_conv3_1, gold_conv1_1, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_1, vgg_ref.conv4_2], feed_dict={images: batch1})        
-        # gold_5_placeholder = tf.placeholder("float", vgg_ref.conv5_1.get_shape())
-        # gold_3_placeholder = tf.placeholder("float", vgg_ref.conv3_1.get_shape())
-        # gold_1_placeholder = tf.placeholder("float", vgg_ref.conv1_1.get_shape())
-
-        # gold_4_content = tf.placeholder("float", vgg_ref.conv4_2.get_shape())
-
-        
-        # generator = gen.GeneratorNet()
-        # generator.build()
-
 
         with tf.name_scope('generator'):
             # Starting data - random 4x4 noise (x3 color channels)
@@ -146,8 +97,36 @@ with tf.device('/gpu:0'):
 
         # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
-        image_vgg = VGGNetwork("image_vgg", tf.concat([target_image, result, result], 0), 1, 1, 1)
-        total_loss = image_vgg.style_loss([(i, 1) for i in range(1, 6)])
+        used_layers = [
+            ('conv1_1', 1.0),
+            ('conv2_1', 1.0),
+            ('conv3_1', 1.0),
+            ('conv4_1', 1.0),
+            ('conv5_1', 1.0)
+        ]
+        image_path = "data/pebbles.jpg"
+
+        img1 = utils.load_image(image_path)
+        target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
+
+        # input_ref = [
+        #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
+        #     utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
+        #     utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
+        #     utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
+        #     utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
+        # ]
+
+        with open("data/vgg16.tfmodel", mode='rb') as f:
+            file_content = f.read()
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(file_content)
+        tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
+
+        target_grams = [tf.constant(sess.run(gramian_for_layer(layer))) for layer in used_layers]
+        
+        tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
+        total_loss = style_loss(used_layers, target_grams)
 
         # alpha - training rate
         alpha = 0.01
@@ -174,24 +153,18 @@ with tf.device('/gpu:0'):
         iterations = 1000
         # batch_size = 1
         # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
-        # batch = [
-        #     np.random.rand(1, 14, 14, 3),
-        #     np.random.rand(1, 28, 28, 3),
-        #     np.random.rand(1, 56, 56, 3),
-        #     np.random.rand(1, 112, 112, 3),
-        #     np.random.rand(1, 224, 224, 3)
-        # ]
+        
 
         for i in range(iterations):
             # batch = (np.random.rand(1, 224, 224, 3)*32)+112
             # batch = batch1
-            batch = [
-                (0.6 * np.random.uniform(-20, 20, (1, 14, 14, 3))) + (0.4 * input_ref[0]),
-                (0.6 * np.random.uniform(-20, 20, (1, 28, 28, 3))) + (0.4 * input_ref[1]),
-                (0.6 * np.random.uniform(-20, 20, (1, 56, 56, 3))) + (0.4 * input_ref[2]),
-                (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
-                (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
-            ]
+            # batch = [
+            #     (0.6 * np.random.uniform(-20, 20, (1, 14, 14, 3))) + (0.4 * input_ref[0]),
+            #     (0.6 * np.random.uniform(-20, 20, (1, 28, 28, 3))) + (0.4 * input_ref[1]),
+            #     (0.6 * np.random.uniform(-20, 20, (1, 56, 56, 3))) + (0.4 * input_ref[2]),
+            #     (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
+            #     (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
+            # ]
             # batch = [
             #     np.random.rand(1, 14, 14, 3),
             #     np.random.rand(1, 28, 28, 3),
@@ -199,6 +172,13 @@ with tf.device('/gpu:0'):
             #     np.random.rand(1, 112, 112, 3),
             #     np.random.rand(1, 224, 224, 3)
             # ]
+            batch = [
+                np.random.uniform(127., 128., (1, 14, 14, 3)),
+                np.random.uniform(127., 128., (1, 28, 28, 3)),
+                np.random.uniform(127., 128., (1, 56, 56, 3)),
+                np.random.uniform(127., 128., (1, 112, 112, 3)),
+                np.random.uniform(127., 128., (1, 224, 224, 3))
+            ]
             feed={}
             for index, layer in enumerate(init_noise):
                 feed[layer] = batch[index]
@@ -210,9 +190,9 @@ with tf.device('/gpu:0'):
                 print("Iteration #{}: loss = {}".format(i, loss_value))
             if i%50 == 0:
                 img = result.eval(session=sess, feed_dict=feed)
-                img = Image.fromarray(np.clip(np.asarray(img)[0], 0, 255), "RGB")
+                img = Image.fromarray(np.asarray(img)[0], "RGB")
                 img.save('output/output-%d.bmp' % i)
           
         img = result.eval(session=sess, feed_dict=feed)
-        img = Image.fromarray(np.clip(np.asarray(img)[0], 0, 255), "RGB")
+        img = Image.fromarray(np.asarray(img)[0], "RGB")
         img.save('output/output-final.bmp')
