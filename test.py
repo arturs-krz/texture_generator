@@ -122,7 +122,7 @@ with tf.device('/gpu:0'):
             graph_def.ParseFromString(file_content)
             tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
 
-            target_grams = [tf.constant(sess.run(gramian_for_layer(layer))) for layer in used_layers]
+            target_grams = [gramian_for_layer(layer) for layer in used_layers]
             
             tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
             total_loss = style_loss(used_layers, target_grams)
