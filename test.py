@@ -127,6 +127,8 @@ with tf.device('/gpu:0'):
             total_loss = style_loss(used_layers, target_grams)
             print(total_loss)
 
+            print(activations_for_layer(used_layers[1]))
+
             # alpha - training rate
             alpha = 0.01
             # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
