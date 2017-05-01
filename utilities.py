@@ -128,16 +128,16 @@ def style_loss(layers, target_grams):
     [num_style+num_content : num_style+num_content+num_synth, :, :, :] holds k synthesized images
     """
     activations = [activations_for_layer(layer) for layer in layers]
-    
-    # Slices are for style and synth image
-    # gramian_diffs = [
-    #     tf.subtract(
-    #         tf.tile(tf.slice(g, [0, 0, 0], [self.num_style, -1, -1]), [self.num_synthesized - self.num_style + 1, 1, 1]),
-    #         tf.slice(g, [self.num_style + self.num_content, 0, 0], [self.num_synthesized, -1, -1]))
-    #     for g in gramians]
-    
     gramians = [gramian_for_layer(layer) for layer in layers]
-    gramian_diffs = [(target_grams[i] - gram) for i, gram in enumerate(gramians)]
+
+    # Slices are for style and synth image
+    gramian_diffs = [
+        tf.subtract(
+            tf.tile(tf.slice(target_grams[i], [0, 0, 0], [1, -1, -1]), [1, 1, 1]),
+            tf.slice(g, [0, 0, 0], [1, -1, -1]))
+        for i,g in enumerate(gramians)]
+    
+    # gramian_diffs = [(target_grams[i] - gram) for i, gram in enumerate(gramians)]
 
     Ns = [g.get_shape().as_list()[2] for g in gramians]
     Ms = [a.get_shape().as_list()[1] * a.get_shape().as_list()[2] for a in activations]
