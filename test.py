@@ -120,10 +120,8 @@ with tf.device('/gpu:0'):
                 file_content = f.read()
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(file_content)
-            # tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
-            tinput = tf.import_graph_def(graph_def, return_elements=['data/inputs:0'], name='vgg')
-            print(tinput)
-
+            tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
+            
             target_grams = [tf.constant(sess.run(gramian_for_layer(layer))) for layer in used_layers]
             print(target_grams)
 
