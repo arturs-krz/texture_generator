@@ -1,6 +1,7 @@
 import skimage
 import numpy as np
 import tensorflow as tf
+import os.path
 
 # from VGG import vgg16
 # from VGG import utils
@@ -159,7 +160,8 @@ with tf.device('/gpu:0'):
             saver = tf.train.Saver()
 
             sess.run(init)
-            saver.restore(sess, "data/model_{}.ckpt".format(image_name))
+            if os.path.isfile("./data/model_{}.ckpt".format(image_name)):
+                saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
             iterations = 2000
             # batch_size = 1
