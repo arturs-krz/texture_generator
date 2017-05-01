@@ -9,8 +9,6 @@ import vgg19
 import utils
 from PIL import Image
 
-from vgg_network import VGGNetwork
-
 from utilities import *
 # import GeneratorNet as gen
 
@@ -125,8 +123,9 @@ with tf.device('/gpu:0'):
             target_grams = [tf.constant(sess.run(gramian_for_layer(layer))) for layer in used_layers]
             print(target_grams)
 
-            # tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
+            tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
             total_loss = style_loss(used_layers, target_grams)
+            print(total_loss)
 
             # alpha - training rate
             alpha = 0.01
