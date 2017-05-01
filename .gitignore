@@ -14,5 +14,6 @@ ulyanov_TextureNets/
 tf_TextureNets/
 VGG/
 data/*.npy
+data/*.tfmodel
 data/.floyddata
 .tmp/

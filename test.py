@@ -9,6 +9,8 @@ import vgg19
 import utils
 from PIL import Image
 
+from vgg_network import VGGNetwork
+
 from utilities import *
 # import GeneratorNet as gen
 
@@ -64,26 +66,26 @@ with tf.device('/gpu:0'):
             ('conv4_1', 1.0),
             ('conv5_1', 1.0)
         ]
-        image_path = "data/grass.jpg"
+        image_path = "data/pebbles.jpg"
 
         img1 = utils.load_image(image_path)
         target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
 
-        input_ref = utils.load_image(image_path, 28).reshape((1, 28, 28, 3))
+        # input_ref = utils.load_image(image_path, 28).reshape((1, 28, 28, 3))
         
         # batch = np.concatenate((batch1, batch2), 0)
         # images = tf.placeholder("float", [1, 224, 224, 3])
         # feed_dict = {images: batch1}
 
-        vgg_ref = vgg19.Vgg19()
-        with tf.name_scope("content_vgg"):
-            vgg_ref.build(target_image)
+        # vgg_ref = vgg19.Vgg19()
+        # with tf.name_scope("content_vgg"):
+        #     vgg_ref.build(target_image)
  
-        # target_grams = [sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1 }) for layer in used_layers]
-        target_grams = {}
-        for layer in used_layers:
-            # target_grams[layer[0]] = sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1})
-            target_grams[layer[0]] = gram_matrix(getattr(vgg_ref, layer[0]))
+        
+        # target_grams = {}
+        # for layer in used_layers:
+        #     # target_grams[layer[0]] = sess.run([getattr(vgg_ref, layer[0])], feed_dict={images: batch1})
+        #     target_grams[layer[0]] = gram_matrix(getattr(vgg_ref, layer[0]))
 
 
         # gold_conv5_1, gold_conv3_1, gold_conv1_1, gold_conv4_2 = sess.run([vgg_ref.conv5_1, vgg_ref.conv3_1, vgg_ref.conv1_1, vgg_ref.conv4_2], feed_dict={images: batch1})        
@@ -132,11 +134,14 @@ with tf.device('/gpu:0'):
 
             tf.summary.image('Output image', result)
 
-        vgg = vgg19.Vgg19()
-        with tf.name_scope("content_vgg"):            
-            vgg.build(result)
+        # vgg = vgg19.Vgg19()
+        # with tf.name_scope("content_vgg"):            
+        #     vgg.build(result)
 
-        total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
+        # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
+
+        image_vgg = VGGNetwork("image_vgg", tf.concat([target_image, result, result], 0), 1, 1, 1)
+        total_loss = image_vgg.style_loss([(i, 1) for i in range(1, 6)])
 
         # alpha - training rate
         alpha = 0.01
