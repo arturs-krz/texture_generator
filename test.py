@@ -90,109 +90,108 @@ with tf.device('/gpu:0'):
 
             tf.summary.image('Output image', result)
 
-        # vgg = vgg19.Vgg19()
-        # with tf.name_scope("content_vgg"):            
-        #     vgg.build(result)
+            # vgg = vgg19.Vgg19()
+            # with tf.name_scope("content_vgg"):            
+            #     vgg.build(result)
 
-        # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
+            # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
-        used_layers = [
-            ('conv1_1', 1.0),
-            ('conv2_1', 1.0),
-            ('conv3_1', 1.0),
-            ('conv4_1', 1.0),
-            ('conv5_1', 1.0)
-        ]
-        image_path = "data/pebbles.jpg"
+            used_layers = [
+                ('conv1_1', 1.0),
+                ('conv2_1', 1.0),
+                ('conv3_1', 1.0),
+                ('conv4_1', 1.0),
+                ('conv5_1', 1.0)
+            ]
+            image_path = "data/pebbles.jpg"
 
-        img1 = utils.load_image(image_path)
-        target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
+            img1 = utils.load_image(image_path)
+            target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
 
-        # input_ref = [
-        #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
-        #     utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
-        #     utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
-        #     utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
-        #     utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
-        # ]
+            # input_ref = [
+            #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
+            #     utils.load_image(image_path, 28).reshape((1, 28, 28, 3)),
+            #     utils.load_image(image_path, 56).reshape((1, 56, 56, 3)),
+            #     utils.load_image(image_path, 112).reshape((1, 112, 112, 3)),
+            #     utils.load_image(image_path, 224).reshape((1, 224, 224, 3))
+            # ]
 
-        with open("data/vgg16.tfmodel", mode='rb') as f:
-            file_content = f.read()
-        graph_def = tf.GraphDef()
-        graph_def.ParseFromString(file_content)
-        tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
+            with open("data/vgg16.tfmodel", mode='rb') as f:
+                file_content = f.read()
+            graph_def = tf.GraphDef()
+            graph_def.ParseFromString(file_content)
+            tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg')
 
-        target_grams = [tf.constant(sess.run(gramian_for_layer(layer))) for layer in used_layers]
-        
-        tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
-        with tf.get_default_graph():
+            target_grams = [tf.constant(sess.run(gramian_for_layer(layer))) for layer in used_layers]
+            
+            tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
             total_loss = style_loss(used_layers, target_grams)
 
-        # alpha - training rate
-        alpha = 0.01
-        # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
-        # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
-        optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
-    
-        tvars = tf.trainable_variables()
-        t_vars = [var for var in tvars if 'gen_' in var.name]
-        print("Found {} trainable variables".format(len(t_vars)))
-        train_step = optimizer.minimize(total_loss, var_list=t_vars)
-
-        # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
-        # train_step = opt_func.apply_gradients(zip(grads, t_vars))
-
-        tf.summary.scalar('loss', total_loss)
-        writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
-
-        summary_op = tf.summary.merge_all()
-
-        init = tf.global_variables_initializer()
-        sess.run(init)
+            # alpha - training rate
+            alpha = 0.01
+            # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
+            # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
+            optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
         
-        iterations = 1000
-        # batch_size = 1
-        # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
-        
+            tvars = tf.trainable_variables()
+            t_vars = [var for var in tvars if 'gen_' in var.name]
+            print("Found {} trainable variables".format(len(t_vars)))
+            train_step = optimizer.minimize(total_loss, var_list=t_vars)
 
-        for i in range(iterations):
-            # batch = (np.random.rand(1, 224, 224, 3)*32)+112
-            # batch = batch1
-            # batch = [
-            #     (0.6 * np.random.uniform(-20, 20, (1, 14, 14, 3))) + (0.4 * input_ref[0]),
-            #     (0.6 * np.random.uniform(-20, 20, (1, 28, 28, 3))) + (0.4 * input_ref[1]),
-            #     (0.6 * np.random.uniform(-20, 20, (1, 56, 56, 3))) + (0.4 * input_ref[2]),
-            #     (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
-            #     (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
-            # ]
-            # batch = [
-            #     np.random.rand(1, 14, 14, 3),
-            #     np.random.rand(1, 28, 28, 3),
-            #     np.random.rand(1, 56, 56, 3),
-            #     np.random.rand(1, 112, 112, 3),
-            #     np.random.rand(1, 224, 224, 3)
-            # ]
-            batch = [
-                np.random.uniform(127., 128., (1, 14, 14, 3)),
-                np.random.uniform(127., 128., (1, 28, 28, 3)),
-                np.random.uniform(127., 128., (1, 56, 56, 3)),
-                np.random.uniform(127., 128., (1, 112, 112, 3)),
-                np.random.uniform(127., 128., (1, 224, 224, 3))
-            ]
-            feed={}
-            for index, layer in enumerate(init_noise):
-                feed[layer] = batch[index]
-    
-            train_step.run(session=sess, feed_dict=feed)
-            summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
-            writer.add_summary(summary, i)
-            if i%10 == 0:
-                print("Iteration #{}: loss = {}".format(i, loss_value))
-            if i%50 == 0:
-                img = result.eval(session=sess, feed_dict=feed)
-                img = Image.fromarray(np.asarray(img)[0], "RGB")
-                img.save('output/output-%d.bmp' % i)
-          
-        img = result.eval(session=sess, feed_dict=feed)
-        img = Image.fromarray(np.asarray(img)[0], "RGB")
-        img.save('output/output-final.bmp')
+            # grads, _ = tf.clip_by_global_norm(tf.gradients(total_loss, t_vars), 1)
+            # train_step = opt_func.apply_gradients(zip(grads, t_vars))
+
+            tf.summary.scalar('loss', total_loss)
+            writer = tf.summary.FileWriter('.tmp/logs/', graph=tf.get_default_graph())
+
+            summary_op = tf.summary.merge_all()
+
+            init = tf.global_variables_initializer()
+            sess.run(init)
+            
+            iterations = 1000
+            # batch_size = 1
+            # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
+            
+
+            for i in range(iterations):
+                # batch = (np.random.rand(1, 224, 224, 3)*32)+112
+                # batch = batch1
+                # batch = [
+                #     (0.6 * np.random.uniform(-20, 20, (1, 14, 14, 3))) + (0.4 * input_ref[0]),
+                #     (0.6 * np.random.uniform(-20, 20, (1, 28, 28, 3))) + (0.4 * input_ref[1]),
+                #     (0.6 * np.random.uniform(-20, 20, (1, 56, 56, 3))) + (0.4 * input_ref[2]),
+                #     (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
+                #     (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
+                # ]
+                # batch = [
+                #     np.random.rand(1, 14, 14, 3),
+                #     np.random.rand(1, 28, 28, 3),
+                #     np.random.rand(1, 56, 56, 3),
+                #     np.random.rand(1, 112, 112, 3),
+                #     np.random.rand(1, 224, 224, 3)
+                # ]
+                batch = [
+                    np.random.uniform(127., 128., (1, 14, 14, 3)),
+                    np.random.uniform(127., 128., (1, 28, 28, 3)),
+                    np.random.uniform(127., 128., (1, 56, 56, 3)),
+                    np.random.uniform(127., 128., (1, 112, 112, 3)),
+                    np.random.uniform(127., 128., (1, 224, 224, 3))
+                ]
+                feed={}
+                for index, layer in enumerate(init_noise):
+                    feed[layer] = batch[index]
+        
+                train_step.run(session=sess, feed_dict=feed)
+                summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
+                writer.add_summary(summary, i)
+                if i%10 == 0:
+                    print("Iteration #{}: loss = {}".format(i, loss_value))
+                if i%50 == 0:
+                    img = result.eval(session=sess, feed_dict=feed)
+                    img = Image.fromarray(np.asarray(img)[0], "RGB")
+                    img.save('output/output-%d.bmp' % i)
+            
+            img = result.eval(session=sess, feed_dict=feed)
+            img = Image.fromarray(np.asarray(img)[0], "RGB")
+            img.save('output/output-final.bmp')
