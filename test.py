@@ -168,20 +168,20 @@ with tf.device('/gpu:0'):
                 #     (0.6 * np.random.uniform(-20, 20, (1, 112, 112, 3))) + (0.4 * input_ref[3]),
                 #     (0.6 * np.random.uniform(-20, 20, (1, 224, 224, 3))) + (0.4 * input_ref[4])
                 # ]
-                # batch = [
-                #     np.random.rand(1, 14, 14, 3),
-                #     np.random.rand(1, 28, 28, 3),
-                #     np.random.rand(1, 56, 56, 3),
-                #     np.random.rand(1, 112, 112, 3),
-                #     np.random.rand(1, 224, 224, 3)
-                # ]
                 batch = [
-                    np.random.uniform(127., 128., (1, 14, 14, 3)),
-                    np.random.uniform(127., 128., (1, 28, 28, 3)),
-                    np.random.uniform(127., 128., (1, 56, 56, 3)),
-                    np.random.uniform(127., 128., (1, 112, 112, 3)),
-                    np.random.uniform(127., 128., (1, 224, 224, 3))
+                    np.random.rand(1, 14, 14, 3),
+                    np.random.rand(1, 28, 28, 3),
+                    np.random.rand(1, 56, 56, 3),
+                    np.random.rand(1, 112, 112, 3),
+                    np.random.rand(1, 224, 224, 3)
                 ]
+                # batch = [
+                #     np.random.uniform(127., 128., (1, 14, 14, 3)),
+                #     np.random.uniform(127., 128., (1, 28, 28, 3)),
+                #     np.random.uniform(127., 128., (1, 56, 56, 3)),
+                #     np.random.uniform(127., 128., (1, 112, 112, 3)),
+                #     np.random.uniform(127., 128., (1, 224, 224, 3))
+                # ]
                 feed={}
                 for index, layer in enumerate(init_noise):
                     feed[layer] = batch[index]
