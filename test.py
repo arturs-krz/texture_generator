@@ -99,7 +99,7 @@ with tf.device('/gpu:0'):
                 ('conv4_1', 0.25),
                 ('conv5_1', 0.30)
             ]
-            image_name = "vangogh"
+            image_name = "pebbles"
             image_path = "data/{}.jpg".format(image_name)
 
             img1 = utils.load_image(image_path)
@@ -138,11 +138,11 @@ with tf.device('/gpu:0'):
             # total_loss = style_loss(used_layers, target_activations)
             
             # alpha - training rate
-            alpha = 0.001
-            # train_step = tf.train.AdamOptimizer(alpha).minimize(loss, var_list=generator.t_vars)
-            # train_step = tf.train.AdamOptimizer(alpha).minimize(loss)
-            optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
-        
+            alpha = 0.01
+            
+            # optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
+            optimizer = tf.train.RMSPropOptimizer(learning_rate=alpha, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, centered=False, name'RMSProp')
+
             tvars = tf.trainable_variables()
             t_vars = [var for var in tvars if 'gen_' in var.name]
             print("Found {} trainable variables".format(len(t_vars)))
