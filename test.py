@@ -15,11 +15,14 @@ from utilities import *
 # import GeneratorNet as gen
 
 restore = True
+image_name = "pebbles"
 
-opts, args = getopt.getopt(sys.argv[1:], "n:", ["norestore="])
-for opt, args in opts:
+opts, args = getopt.getopt(sys.argv[1:], "ni:", ["norestore", "image="])
+for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
+    elif opt in ("-i", "--image"):
+        image_name = arg
 
 
 # layer => shape = {1, width, height, filters}
@@ -107,7 +110,7 @@ with tf.device('/gpu:0'):
                 ('conv4_1', 0.25),
                 ('conv5_1', 0.30)
             ]
-            image_name = "pebbles"
+            
             image_path = "data/{}.jpg".format(image_name)
 
             img1 = utils.load_image(image_path)
