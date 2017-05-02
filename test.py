@@ -2,6 +2,7 @@ import skimage
 import numpy as np
 import tensorflow as tf
 import os.path
+import sys, getopt
 
 # from VGG import vgg16
 # from VGG import utils
@@ -12,6 +13,13 @@ from PIL import Image
 
 from utilities import *
 # import GeneratorNet as gen
+
+restore = True
+
+opts, args = getopt.getopt(sys.argv[1:], "n:", ["norestore="])
+for opt, args in opts:
+    if opt in ("-n", "--norestore"):
+        restore = False
 
 
 # layer => shape = {1, width, height, filters}
@@ -161,10 +169,11 @@ with tf.device('/gpu:0'):
             saver = tf.train.Saver()
 
             sess.run(init)
-            print("Checking for model_{}.ckpt".format(image_name))
-            if os.path.isfile("data/model_{}.ckpt.index".format(image_name)):
-                print("Loading existing model...")
-                saver.restore(sess, "data/model_{}.ckpt".format(image_name))
+            if restore:
+                print("Checking for model_{}.ckpt".format(image_name))
+                if os.path.isfile("data/model_{}.ckpt.index".format(image_name)):
+                    print("Loading existing model...")
+                    saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
             iterations = 2000
             # batch_size = 1
