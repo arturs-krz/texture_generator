@@ -151,8 +151,8 @@ with tf.device('/gpu:0'):
             # alpha - training rate
             alpha = 0.01
             
-            # optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
-            optimizer = tf.train.RMSPropOptimizer(learning_rate=alpha, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, centered=False, name='RMSProp')
+            optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
+            # optimizer = tf.train.RMSPropOptimizer(learning_rate=alpha, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, centered=False, name='RMSProp')
 
             tvars = tf.trainable_variables()
             t_vars = [var for var in tvars if 'gen_' in var.name]
@@ -178,7 +178,7 @@ with tf.device('/gpu:0'):
                     print("Loading existing model...")
                     saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
-            iterations = 2000
+            iterations = 3000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
