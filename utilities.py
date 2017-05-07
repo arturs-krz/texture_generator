@@ -99,7 +99,7 @@ def get_random_batch(generated, batch_size=16):
     x_random = np.random.randint(0, img_size - 224, size=batch_size)
     y_random = np.random.randint(0, img_size - 224, size=batch_size)
 
-    batch = [tf.slice(generated, begin=[0, x_random[i], y_random[i], 0], size=[1, 224, 224, 3]) for in range(batch_size)]
+    batch = [tf.slice(generated, begin=[0, x_random[i], y_random[i], 0], size=[1, 224, 224, 3]) for i in range(batch_size)]
     return tf.add_n(batch)
     
 
@@ -130,7 +130,7 @@ def gram_loss(target_activation, generated, layer_weight=1.0, batch_size=16):
     # Tile target batch_size times
     target = tf.tile(tf.slice(G, [0, 0 ,0], [1, -1, -1]), [batch_size, 1, 1])
     gram_diff = target - tf.slice(G, [1, 0, 0], [1, -1, -1])
-    
+
     # loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
     layer_loss = tf.divide(tf.reduce_sum(tf.pow(gram_diff, 2)) * layer_weight, 4 * (N ** 2) * (M ** 2))
     # gradient = tf.reshape(layer_weight * tf.transpose(tf.matmul(FT, gram_diff)) / (M * N**2), shape=layer_shape)
