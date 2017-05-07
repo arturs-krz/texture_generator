@@ -17,12 +17,15 @@ from utilities import *
 restore = True
 image_name = "pebbles"
 batch_size = 16
+iterations = 2000
 
-opts, args = getopt.getopt(sys.argv[1:], "ni:b:", ["norestore", "image=","batch="])
+opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:", ["norestore", "iterations=","target=","batch="])
 for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
-    elif opt in ("-i", "--image"):
+    elif opt in ("-i", "--iterations"):
+        iterations = arg
+    elif opt in ("-t", "--target"):
         image_name = arg
     elif opt in ("-b", "--batch"):
         batch_size = arg
@@ -184,7 +187,6 @@ with tf.device('/gpu:0'):
                     print("Loading existing model...")
                     saver.restore(sess, "data/model_{}.ckpt".format(image_name))
             
-            iterations = 3000
             # batch_size = 1
             # batch = (0.6 * np.random.uniform(-20,20,(1,28,28,3)).astype("float32")) + (0.4 * input_ref)
             
