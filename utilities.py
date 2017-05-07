@@ -88,6 +88,21 @@ def instance_norm(input):
     normalized = (input - mu)/(sigma_sq + epsilon)**(.5)
     return scale * normalized + shift    
 
+def get_random_batch(generated, batch_size=16):
+    """
+    Given a larger generated image, creates a batch of random position 224x224 loss images.
+    Output shape: [batch_size, 224, 224, 3]
+    """
+    shape = generated.get_shape().as_list()
+    img_size = shape[1]     # == shape[2], since it's img_size x img_size
+
+    x_random = np.random.randint(0, img_size - 224, size=batch_size)
+    y_random = np.random.randint(0, img_size - 224, size=batch_size)
+
+    batch = [tf.slice(generated, begin=[0, x_random[i], y_random[i], 0], size=[1, 224, 224, 3]) for in range(batch_size)]
+    return tf.add_n(batch)
+    
+
 def gram_matrix(activation_layer):
     layer_shape = activation_layer.get_shape().as_list()
     
@@ -101,7 +116,7 @@ def gram_matrix(activation_layer):
     return G
 
 
-def gram_loss(target_activation, generated, layer_weight=1.0):
+def gram_loss(target_activation, generated, layer_weight=1.0, batch_size=16):
     layer_shape = generated.get_shape().as_list()
 
     # M = x * y
@@ -112,7 +127,10 @@ def gram_loss(target_activation, generated, layer_weight=1.0):
     G = gram_matrix(activations)
     N = G.get_shape().as_list()[2]
 
-    gram_diff = tf.slice(G, [0, 0, 0], [1, -1, -1]) - tf.slice(G, [1, 0, 0], [1, -1, -1])
+    # Tile target batch_size times
+    target = tf.tile(tf.slice(G, [0, 0 ,0], [1, -1, -1]), [batch_size, 1, 1])
+    gram_diff = target - tf.slice(G, [1, 0, 0], [1, -1, -1])
+    
     # loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
     layer_loss = tf.divide(tf.reduce_sum(tf.pow(gram_diff, 2)) * layer_weight, 4 * (N ** 2) * (M ** 2))
     # gradient = tf.reshape(layer_weight * tf.transpose(tf.matmul(FT, gram_diff)) / (M * N**2), shape=layer_shape)

@@ -16,14 +16,16 @@ from utilities import *
 
 restore = True
 image_name = "pebbles"
+batch_size = 16
 
-opts, args = getopt.getopt(sys.argv[1:], "ni:", ["norestore", "image="])
+opts, args = getopt.getopt(sys.argv[1:], "ni:b:", ["norestore", "image=","batch="])
 for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
     elif opt in ("-i", "--image"):
         image_name = arg
-
+    elif opt in ("-b", "--batch"):
+        batch_size = arg
 
 # layer => shape = {1, width, height, filters}
 def gram_matrix_old(layer, area, filters):
@@ -75,7 +77,9 @@ with tf.device('/gpu:0'):
                 tf.placeholder("float", shape=[1,28,28,3]),
                 tf.placeholder("float", shape=[1,56,56,3]),
                 tf.placeholder("float", shape=[1,112,112,3]), 
-                tf.placeholder("float", shape=[1,224,224,3]), 
+                tf.placeholder("float", shape=[1,224,224,3]),
+                tf.placeholder("float", shape=[1,448,448,3]), 
+                tf.placeholder("float", shape=[1,896,896,3]),
             ] 
 
             current_aggregate = init_noise[0]
@@ -121,12 +125,14 @@ with tf.device('/gpu:0'):
 
             target_activations = [sess.run(getattr(vgg_ref, layer[0])) for layer in used_layers]
 
+            batched_result = get_random_batch(result, batch_size=batch_size)
+
             vgg = vgg16.Vgg16()
             with tf.name_scope("content_vgg"):            
-                vgg.build(result)
+                vgg.build(batched_result)
 
             # total_loss = tf.divide(tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)]), len(used_layers))
-            total_loss = tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1]) for i, layer in enumerate(used_layers)])
+            total_loss = tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
 
             # input_ref = [
             #     utils.load_image(image_path, 14).reshape((1, 14, 14, 3)),
@@ -198,7 +204,9 @@ with tf.device('/gpu:0'):
                     np.random.rand(1, 28, 28, 3),
                     np.random.rand(1, 56, 56, 3),
                     np.random.rand(1, 112, 112, 3),
-                    np.random.rand(1, 224, 224, 3)
+                    np.random.rand(1, 224, 224, 3),
+                    np.random.rand(1, 448, 448, 3),
+                    np.random.rand(1, 896, 896, 3)
                 ]
                 # batch = [
                 #     (0.6 * np.random.rand(1, 14, 14, 3)) + (0.4 * input_ref[0]),
@@ -217,12 +225,12 @@ with tf.device('/gpu:0'):
                 if i%10 == 0:
                     print("Iteration #{}: loss = {}".format(i, loss_value))
                 if i%50 == 0:
-                    img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
+                    img = result.eval(session=sess, feed_dict=feed).reshape((896, 896, 3))
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
                     skimage.io.imsave("output/iteration-%d.jpeg" % i, img)
 
             saver.save(sess, "data/model_{}.ckpt".format(image_name))
             
-            img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
+            img = result.eval(session=sess, feed_dict=feed).reshape((896, 896, 3))
             img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
             skimage.io.imsave("output/final.jpeg", img)
