@@ -226,12 +226,12 @@ with tf.device('/gpu:0'):
                 if i%10 == 0:
                     print("Iteration #{}: loss = {}".format(i, loss_value))
                 if i%50 == 0:
-                    img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
+                    img = result.eval(session=sess, feed_dict=feed)[0,:,:,:].reshape((224, 224, 3))
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
                     skimage.io.imsave("output/iteration-%d.jpeg" % i, img)
 
             saver.save(sess, "data/model_{}.ckpt".format(image_name))
             
-            img = result.eval(session=sess, feed_dict=feed).reshape((224, 224, 3))
+            img = result.eval(session=sess, feed_dict=feed)[0,:,:,:].reshape((224, 224, 3))
             img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
             skimage.io.imsave("output/final.jpeg", img)
