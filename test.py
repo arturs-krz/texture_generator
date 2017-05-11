@@ -238,7 +238,7 @@ with tf.device('/gpu:0'):
                 # if i%50 == 0:
                     img = result.eval(session=sess, feed_dict=feed)[0,:,:,:].reshape((224, 224, 3))
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
-                    skimage.io.imsave("output/iteration-%d.jpeg" % (i + savediff), img)
+                    skimage.io.imsave("output/{}/iteration-{}.jpeg".format(image_name, i + savediff), img)
 
             saver.save(sess, "data/model_{}.ckpt".format(image_name))
             
