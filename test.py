@@ -1,7 +1,8 @@
 import skimage
 import numpy as np
 import tensorflow as tf
-import os.path, os.makedirs
+import os.path
+import os.makedirs
 import sys, getopt
 
 # from VGG import vgg16
