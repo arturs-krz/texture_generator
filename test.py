@@ -18,8 +18,10 @@ restore = True
 image_name = "pebbles"
 batch_size = 1
 iterations = 2000
+alpha = 0.01
+savediff = 0
 
-opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:", ["norestore", "iterations=","target=","batch="])
+opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:c:l:", ["norestore", "iterations=","target=","batch=","continue=","learnrate="])
 for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
@@ -29,6 +31,10 @@ for opt, arg in opts:
         image_name = arg
     elif opt in ("-b", "--batch"):
         batch_size = int(arg)
+    elif opt in ("-c", "--continue"):
+        savediff = int(arg)
+    elif opt in ("-l", "--learnrate"):
+        alpha = int(arg)
 
 # layer => shape = {1, width, height, filters}
 def gram_matrix_old(layer, area, filters):
@@ -163,9 +169,6 @@ with tf.device('/gpu:0'):
             
             # total_loss = style_loss(used_layers, target_activations)
             
-            # alpha - training rate
-            alpha = 0.01
-            
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
             # optimizer = tf.train.RMSPropOptimizer(learning_rate=alpha, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, centered=False, name='RMSProp')
 
@@ -235,7 +238,7 @@ with tf.device('/gpu:0'):
                 # if i%50 == 0:
                     img = result.eval(session=sess, feed_dict=feed)[0,:,:,:].reshape((224, 224, 3))
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
-                    skimage.io.imsave("output/iteration-%d.jpeg" % i, img)
+                    skimage.io.imsave("output/iteration-%d.jpeg" % (i + savediff), img)
 
             saver.save(sess, "data/model_{}.ckpt".format(image_name))
             
