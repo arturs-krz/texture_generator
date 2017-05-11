@@ -34,7 +34,7 @@ for opt, arg in opts:
     elif opt in ("-c", "--continue"):
         savediff = int(arg)
     elif opt in ("-l", "--learnrate"):
-        alpha = int(arg)
+        alpha = float(arg)
 
 # layer => shape = {1, width, height, filters}
 def gram_matrix_old(layer, area, filters):
