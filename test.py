@@ -2,7 +2,7 @@ import skimage
 import numpy as np
 import tensorflow as tf
 import os.path
-import os.makedirs
+import os
 import sys, getopt
 
 # from VGG import vgg16
