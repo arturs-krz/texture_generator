@@ -24,11 +24,11 @@ for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
     elif opt in ("-i", "--iterations"):
-        iterations = arg
+        iterations = int(arg)
     elif opt in ("-t", "--target"):
         image_name = arg
     elif opt in ("-b", "--batch"):
-        batch_size = arg
+        batch_size = int(arg)
 
 # layer => shape = {1, width, height, filters}
 def gram_matrix_old(layer, area, filters):
