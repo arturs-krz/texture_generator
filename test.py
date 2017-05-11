@@ -16,7 +16,7 @@ from utilities import *
 
 restore = True
 image_name = "pebbles"
-batch_size = 16
+batch_size = 1
 iterations = 2000
 
 opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:", ["norestore", "iterations=","target=","batch="])
@@ -225,7 +225,7 @@ with tf.device('/gpu:0'):
                 writer.add_summary(summary, i)
                 if i%10 == 0:
                     print("Iteration #{}: loss = {}".format(i, loss_value))
-                if i%50 == 0:
+                # if i%50 == 0:
                     img = result.eval(session=sess, feed_dict=feed)[0,:,:,:].reshape((224, 224, 3))
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
                     skimage.io.imsave("output/iteration-%d.jpeg" % i, img)
