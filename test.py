@@ -109,12 +109,19 @@ with tf.device('/gpu:0'):
 
             # total_loss = tf.divide(tf.add_n([gram_loss(target_grams[layer[0]], getattr(vgg, layer[0]), layer_weight=layer[1]) for layer in used_layers]), len(used_layers))
 
+            # used_layers = [
+            #     ('conv1_1', 0.10),
+            #     ('conv2_1', 0.15),
+            #     ('conv3_1', 0.20),
+            #     ('conv4_1', 0.25),
+            #     ('conv5_1', 0.30)
+            # ]
             used_layers = [
-                ('conv1_1', 0.10),
-                ('conv2_1', 0.15),
-                ('conv3_1', 0.20),
-                ('conv4_1', 0.25),
-                ('conv5_1', 0.30)
+                ('conv1_1', 0.2),
+                ('conv2_1', 0.2),
+                ('conv3_1', 0.2),
+                ('conv4_1', 0.2),
+                ('conv5_1', 0.2)
             ]
             
             image_path = "data/{}.jpg".format(image_name)
