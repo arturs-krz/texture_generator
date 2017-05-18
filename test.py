@@ -93,20 +93,20 @@ with tf.device('/gpu:0'):
             current_aggregate = init_noise[0]
             current_channels = 8
             for index, noise_layer in enumerate(init_noise[1:]):  # skip first
-                low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index))
-                low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index))
-                low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index))
+                low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index), activation=None)
+                low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index), activation=None)
+                low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index), activation='relu')
 
-                high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index))
-                high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index))
-                high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index))
+                high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index), activation=None)
+                high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index), activation=None)
+                high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index), activation='relu')
 
                 current_channels += 8
                 current_aggregate = join_resolutions(low_conv3, high_conv3)
                 
-            result_conv1 = conv(current_aggregate, 3, 3, 1, name='gen_result_1')
-            result_conv2 = conv(result_conv1, 3, 3, 1, name='gen_result_2')
-            result_conv3 = conv(result_conv2, 3, 1, 1, name='gen_result_3')
+            result_conv1 = conv(current_aggregate, 3, 3, 1, name='gen_result_1', activation=None)
+            result_conv2 = conv(result_conv1, 3, 3, 1, name='gen_result_2', activation=None)
+            result_conv3 = conv(result_conv2, 3, 1, 1, name='gen_result_3', activation='relu')
 
             result = conv(result_conv3, 3, 1, 1, name='gen_final')
             print('Result shape: ', result.get_shape())
