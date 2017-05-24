@@ -152,7 +152,7 @@ def gram_loss(target_activation, generated, layer_weight=1.0, batch_size=1):
         target = tf.tile(tf.slice(G, [0, 0 ,0], [1, -1, -1]), [batch_size, 1, 1])
     else:
         target = tf.slice(G, [0, 0 ,0], [1, -1, -1])
-    gram_diff = target - tf.slice(G, [1, 0, 0], [1, -1, -1])
+    gram_diff = target - tf.slice(G, [1, 0, 0], [batch_size, -1, -1])
 
     # loss = layer_weight/4. * tf.reduce_sum(tf.pow(gram_diff,2)) / (N**2)
     layer_loss = tf.divide(tf.reduce_sum(tf.pow(gram_diff, 2)) * layer_weight, 4 * (N ** 2) * (M ** 2))

@@ -13,12 +13,13 @@ from utilities import *
 
 restore = True
 image_name = "pebbles"
+activation = "leaky_relu"
 batch_size = 1
 iterations = 2000
 alpha = 0.01
 savediff = 0
 
-opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:c:l:", ["norestore", "iterations=","target=","batch=","continue=","learnrate="])
+opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:c:l:a:", ["norestore", "iterations=","target=","batch=","continue=","learnrate=","activation="])
 for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
@@ -31,7 +32,9 @@ for opt, arg in opts:
     elif opt in ("-c", "--continue"):
         savediff = int(arg)
     elif opt in ("-l", "--learnrate"):
-        alpha = float(arg)    
+        alpha = float(arg)
+    elif opt in ("-a", "--activation"):
+        activation = arg    
 
 with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
@@ -50,22 +53,22 @@ with tf.device('/gpu:0'):
             current_aggregate = init_noise[0]
             current_channels = 8
             for index, noise_layer in enumerate(init_noise[1:]):  # skip first
-                low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index), activation='relu')
-                low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index), activation='relu')
-                low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index), activation='relu')
+                low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index), activation=activation)
+                low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index), activation=activation)
+                low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index), activation=activation)
 
-                high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index), activation='relu')
-                high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index), activation='relu')
-                high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index), activation='relu')
+                high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index), activation=activation)
+                high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index), activation=activation)
+                high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index), activation=activation)
 
                 current_channels += 8
                 current_aggregate = join_resolutions(low_conv3, high_conv3)
                 
-            result_conv1 = conv(current_aggregate, 3, 3, 1, name='gen_result_1', activation='relu')
-            result_conv2 = conv(result_conv1, 3, 3, 1, name='gen_result_2', activation='relu')
-            result_conv3 = conv(result_conv2, 3, 1, 1, name='gen_result_3', activation='relu')
+            result_conv1 = conv(current_aggregate, 3, 3, 1, name='gen_result_1', activation=activation)
+            result_conv2 = conv(result_conv1, 3, 3, 1, name='gen_result_2', activation=activation)
+            result_conv3 = conv(result_conv2, 3, 1, 1, name='gen_result_3', activation=activation)
 
-            result = conv(result_conv3, 3, 1, 1, name='gen_final', activation='relu')
+            result = conv(result_conv3, 3, 1, 1, name='gen_final', activation=activation)
             print('Result shape: ', result.get_shape())
 
             tf.summary.image('Output image', result)
