@@ -49,7 +49,7 @@ def bias_var(num_filters, input_channels, glorot=True):
     return tf.Variable(initial)
 
 
-def conv(input, num_filters, filter_size, stride_len, activation='leaky_relu', name='conv'):
+def conv(input, num_filters, filter_size, stride_len, activation='leaky_relu', name='conv', padding='SAME'):
     with tf.name_scope(name):
         input_shape = input.get_shape().as_list()
         weights = weight_var(shape=[filter_size, filter_size, input_shape[3], num_filters])
@@ -60,7 +60,7 @@ def conv(input, num_filters, filter_size, stride_len, activation='leaky_relu', n
             input=input, 
             filter=weights, 
             strides=[1, stride_len, stride_len, 1],
-            padding="SAME",
+            padding=padding,
             name=name
         )
         # output = instance_norm(output)
@@ -72,6 +72,8 @@ def conv(input, num_filters, filter_size, stride_len, activation='leaky_relu', n
             output = tf.nn.relu(output)
         elif activation == 'leaky_relu':
             output = leaky_relu(output, alpha=0.01)
+        elif activation == 'elu':
+            output = tf.nn.elu(output)
         
         return output
 

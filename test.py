@@ -6,11 +6,13 @@ import os
 import sys, getopt
 
 import vgg16
+import extreme_net
 import utils
 from PIL import Image
 
 from utilities import *
 
+descriptor = 'VGG'
 restore = True
 image_name = "pebbles"
 activation = "leaky_relu"
@@ -19,7 +21,7 @@ iterations = 2000
 alpha = 0.01
 savediff = 0
 
-opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:c:l:a:", ["norestore", "iterations=","target=","batch=","continue=","learnrate=","activation="])
+opts, args = getopt.getopt(sys.argv[1:], "ni:t:b:c:l:a:d:", ["norestore", "iterations=","target=","batch=","continue=","learnrate=","activation=","descriptor="])
 for opt, arg in opts:
     if opt in ("-n", "--norestore"):
         restore = False
@@ -35,6 +37,8 @@ for opt, arg in opts:
         alpha = float(arg)
     elif opt in ("-a", "--activation"):
         activation = arg    
+    elif opt in ("-d", "--descriptor"):
+        descriptor = arg
 
 with tf.device('/gpu:0'):
 # with tf.device('/cpu:0'):
@@ -74,13 +78,7 @@ with tf.device('/gpu:0'):
             tf.summary.image('Output image', result)
 
 
-            used_layers = [
-                ('conv1_1', 0.10),
-                ('conv2_1', 0.15),
-                ('conv3_1', 0.20),
-                ('conv4_1', 0.25),
-                ('conv5_1', 0.30)
-            ]
+            
             # used_layers = [
             #     ('conv1_1', 0.2),
             #     ('conv2_1', 0.2),
@@ -93,19 +91,46 @@ with tf.device('/gpu:0'):
 
             img1 = utils.load_image(image_path)
             target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
-            vgg_ref = vgg16.Vgg16()
-            with tf.name_scope("ref_vgg"):
-                vgg_ref.build(target_image)
 
-            target_activations = [sess.run(getattr(vgg_ref, layer[0])) for layer in used_layers]
+            if descriptor == 'VGG':
 
-            # batched_result = get_random_batch(result, batch_size=batch_size)
+                used_layers = [
+                    ('conv1_1', 0.10),
+                    ('conv2_1', 0.15),
+                    ('conv3_1', 0.20),
+                    ('conv4_1', 0.25),
+                    ('conv5_1', 0.30)
+                ]
 
-            vgg = vgg16.Vgg16()
-            with tf.name_scope("content_vgg"):            
-                vgg.build(result)
+                vgg_ref = vgg16.Vgg16()
+                with tf.name_scope("ref_vgg"):
+                    vgg_ref.build(target_image)
 
-            total_loss = tf.add_n([gram_loss(target_activations[i], getattr(vgg, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
+                target_activations = [sess.run(getattr(vgg_ref, layer[0])) for layer in used_layers]
+
+                # batched_result = get_random_batch(result, batch_size=batch_size)
+
+                descriptor_net = vgg16.Vgg16()
+                with tf.name_scope("content_vgg"):            
+                    descriptor_net.build(result)
+                    
+
+            elif descriptor == 'ExtremeNet':
+                used_layers = [
+                    ('conv1_1', 0.10),
+                    ('conv2_1', 0.15),
+                    ('conv3_1', 0.20),
+                    ('conv4_1', 0.25),
+                    ('conv4_3', 0.30)
+                ]
+
+                extreme_ref = extreme_net.ExtremeNet(target_image)
+                target_activations = [sess.run(getattr(extreme_ref, layer[0])) for layer in used_layers]
+
+                descriptor_net = extreme_net.ExtremeNet(result)
+
+
+            total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
             
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
             # optimizer = tf.train.RMSPropOptimizer(learning_rate=alpha, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, centered=False, name='RMSProp')
