@@ -124,10 +124,10 @@ with tf.device('/gpu:0'):
                     ('conv4_3', 0.30)
                 ]
 
-                extreme_ref = extreme_net.ExtremeNet(target_image)
+                extreme_ref = extreme_net.ExtremeNet(target_image, sess)
                 target_activations = [sess.run(getattr(extreme_ref, layer[0])) for layer in used_layers]
 
-                descriptor_net = extreme_net.ExtremeNet(result)
+                descriptor_net = extreme_net.ExtremeNet(result, sess)
 
 
             total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
