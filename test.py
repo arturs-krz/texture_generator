@@ -117,18 +117,22 @@ with tf.device('/gpu:0'):
 
             elif descriptor == 'ExtremeNet':
                 used_layers = [
-                    ('conv1_1', 0.10),
-                    ('conv2_1', 0.15),
-                    ('conv3_1', 0.20),
-                    ('conv4_1', 0.25),
-                    ('conv4_3', 0.30)
+                    ('conv1_1', 1.0),
+                    ('conv1_2', 1.0),
+                    ('conv2_1', 1.0),
+                    ('conv2_2', 1.0),
+                    ('conv3_1', 1.0),
+                    ('conv3_2', 1.0),
+                    ('conv4_1', 1.0),
+                    ('conv4_2', 1.0),
+                    ('conv4_3', 1.0)
                 ]
 
                 extreme_ref = extreme_net.ExtremeNet(target_image, sess)
                 target_activations = [sess.run(getattr(extreme_ref, layer[0])) for layer in used_layers]
 
                 descriptor_net = extreme_net.ExtremeNet(result, sess)
-
+                print([getattr(descriptor_net, layer[0]) for layer in used_layers])
 
             total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
             
