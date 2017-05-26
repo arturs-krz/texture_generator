@@ -46,33 +46,42 @@ with tf.device('/gpu:0'):
         with tf.get_default_graph().name_scope('generator'):
 
             # Uļjanova arhitektūra
-            init_noise = [
-                tf.placeholder("float", shape=[batch_size,14,14,3]),
-                tf.placeholder("float", shape=[batch_size,28,28,3]),
-                tf.placeholder("float", shape=[batch_size,56,56,3]),
-                tf.placeholder("float", shape=[batch_size,112,112,3]), 
-                tf.placeholder("float", shape=[batch_size,224,224,3]),
-            ] 
+            # init_noise = [
+            #     tf.placeholder("float", shape=[batch_size,14,14,3]),
+            #     tf.placeholder("float", shape=[batch_size,28,28,3]),
+            #     tf.placeholder("float", shape=[batch_size,56,56,3]),
+            #     tf.placeholder("float", shape=[batch_size,112,112,3]), 
+            #     tf.placeholder("float", shape=[batch_size,224,224,3]),
+            # ] 
 
-            current_aggregate = init_noise[0]
-            current_channels = 8
-            for index, noise_layer in enumerate(init_noise[1:]):  # skip first
-                low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index), activation=activation)
-                low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index), activation=activation)
-                low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index), activation=activation)
+            # current_aggregate = init_noise[0]
+            # current_channels = 8
+            # for index, noise_layer in enumerate(init_noise[1:]):  # skip first
+            #     low_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_low_conv{}_1'.format(index), activation=activation)
+            #     low_conv2 = conv(low_conv1, current_channels, 3, 1, name='gen_low_conv{}_2'.format(index), activation=activation)
+            #     low_conv3 = conv(low_conv2, current_channels, 1, 1, name='gen_low_conv{}_3'.format(index), activation=activation)
 
-                high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index), activation=activation)
-                high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index), activation=activation)
-                high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index), activation=activation)
+            #     high_conv1 = conv(noise_layer, 8, 3, 1, name='gen_high_conv{}_1'.format(index), activation=activation)
+            #     high_conv2 = conv(high_conv1, 8, 3, 1, name='gen_high_conv{}_2'.format(index), activation=activation)
+            #     high_conv3 = conv(high_conv2, 8, 1, 1, name='gen_high_conv{}_3'.format(index), activation=activation)
 
-                current_channels += 8
-                current_aggregate = join_resolutions(low_conv3, high_conv3)
+            #     current_channels += 8
+            #     current_aggregate = join_resolutions(low_conv3, high_conv3)
                 
-            result_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_result_1', activation=activation)
-            result_conv2 = conv(result_conv1, current_channels, 3, 1, name='gen_result_2', activation=activation)
-            result_conv3 = conv(result_conv2, current_channels, 1, 1, name='gen_result_3', activation=activation)
+            # result_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_result_1', activation=activation)
+            # result_conv2 = conv(result_conv1, current_channels, 3, 1, name='gen_result_2', activation=activation)
+            # result_conv3 = conv(result_conv2, current_channels, 1, 1, name='gen_result_3', activation=activation)
 
-            result = conv(result_conv3, 3, 1, 1, name='gen_final', activation=activation)
+            # result = conv(result_conv3, 3, 1, 1, name='gen_final', activation=activation)
+
+            single_noise = tf.placeholder("float", shape=[1,224,224,3])
+            conv1_1 = conv(single_noise, 8, 3, 1, name='gen_conv1_1')
+            conv1_2 = conv(conv1_1, 8, 3, 1, name='gen_conv1_2')
+            conv2_1 = conv(conv1_2, 16, 3, 1, name='gen_conv2_1')
+            conv2_2 = conv(conv2_1, 16, 3, 1, name='gen_conv2_2')
+            result = conv(conv2_2, 3, 1, 1, name='gen_final')
+
+
             print('Result shape: ', result.get_shape())
 
             tf.summary.image('Output image', result)
@@ -185,16 +194,17 @@ with tf.device('/gpu:0'):
             print("Batch size: {}".format(batch_size))
             for i in range(iterations):
                 
-                batch = [
-                    np.random.rand(batch_size, 14, 14, 3),
-                    np.random.rand(batch_size, 28, 28, 3),
-                    np.random.rand(batch_size, 56, 56, 3),
-                    np.random.rand(batch_size, 112, 112, 3),
-                    np.random.rand(batch_size, 224, 224, 3),
-                ]
-                feed={}
-                for index, layer in enumerate(init_noise):
-                    feed[layer] = batch[index]
+                # batch = [
+                #     np.random.rand(batch_size, 14, 14, 3),
+                #     np.random.rand(batch_size, 28, 28, 3),
+                #     np.random.rand(batch_size, 56, 56, 3),
+                #     np.random.rand(batch_size, 112, 112, 3),
+                #     np.random.rand(batch_size, 224, 224, 3),
+                # ]
+                # feed={}
+                # for index, layer in enumerate(init_noise):
+                #     feed[layer] = batch[index]
+                feed={single_noise: np.random.rand(1, 224, 224, 3)}
         
                 train_step.run(session=sess, feed_dict=feed)
                 summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
