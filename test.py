@@ -12,7 +12,7 @@ from PIL import Image
 
 from utilities import *
 
-descriptor = 'VGG'
+descriptor = 'VGG_tfmodel'
 restore = True
 image_name = "pebbles"
 activation = "leaky_relu"
@@ -92,7 +92,7 @@ with tf.device('/gpu:0'):
             img1 = utils.load_image(image_path)
             target_image = tf.to_float(tf.constant(img1.reshape((1, 224, 224, 3))))
 
-            if descriptor == 'VGG':
+            if descriptor == 'VGG_npy':
 
                 used_layers = [
                     ('conv1_1', 0.10),
@@ -113,7 +113,19 @@ with tf.device('/gpu:0'):
                 descriptor_net = vgg16.Vgg16()
                 with tf.name_scope("content_vgg"):            
                     descriptor_net.build(result)
-                    
+                total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
+
+            elif descriptor == 'VGG_tfmodel':
+                with open("data/vgg16.tfmodel", mode='rb') as f:
+                    file_content = f.read()
+                graph_def = tf.GraphDef()
+                graph_def.ParseFromString(file_content)
+                tf.import_graph_def(graph_def, input_map={"images": target_image}, name='vgg_ref')
+            
+                target_activations = [sess.run(activations_for_layer(layer, ref=True)) for layer in used_layers]
+
+                tf.import_graph_def(graph_def, input_map={"images": result}, name='vgg')
+                total_loss = tf.add_n([gram_loss(target_activations[i], activations_for_layer(layer), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)]) 
 
             elif descriptor == 'ExtremeNet':
                 used_layers = [
@@ -133,8 +145,8 @@ with tf.device('/gpu:0'):
 
                 descriptor_net = extreme_net.ExtremeNet(result, sess)
                 print([getattr(descriptor_net, layer[0]) for layer in used_layers])
-
-            total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
+                total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
+            
             
             optimizer = tf.train.AdamOptimizer(learning_rate=alpha, beta1=0.9, beta2=0.999, epsilon=1e-08, use_locking=False, name='Adam')
             # optimizer = tf.train.RMSPropOptimizer(learning_rate=alpha, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, centered=False, name='RMSProp')
