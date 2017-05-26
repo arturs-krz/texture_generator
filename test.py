@@ -74,12 +74,12 @@ with tf.device('/gpu:0'):
 
             # result = conv(result_conv3, 3, 1, 1, name='gen_final', activation=activation)
 
-            single_noise = tf.placeholder("float", shape=[1,224,224,3])
-            conv1_1 = conv(single_noise, 8, 3, 1, name='gen_conv1_1')
-            conv1_2 = conv(conv1_1, 8, 3, 1, name='gen_conv1_2')
-            conv2_1 = conv(conv1_2, 16, 3, 1, name='gen_conv2_1')
-            conv2_2 = conv(conv2_1, 16, 3, 1, name='gen_conv2_2')
-            result = conv(conv2_2, 3, 1, 1, name='gen_final')
+            single_noise = tf.placeholder("float", shape=[1,224,224,16])
+            conv1_1 = conv(single_noise, 16, 3, 1, name='gen_conv1_1')
+            conv1_2 = conv(conv1_1, 16, 3, 1, name='gen_conv1_2')
+            # conv2_1 = conv(conv1_2, 16, 3, 1, name='gen_conv2_1')
+            # conv2_2 = conv(conv2_1, 16, 3, 1, name='gen_conv2_2')
+            result = conv(conv1_2, 3, 1, 1, name='gen_final')
 
 
             print('Result shape: ', result.get_shape())
