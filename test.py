@@ -116,6 +116,14 @@ with tf.device('/gpu:0'):
                 total_loss = tf.add_n([gram_loss(target_activations[i], getattr(descriptor_net, layer[0]), layer_weight=layer[1], batch_size=batch_size) for i, layer in enumerate(used_layers)])
 
             elif descriptor == 'VGG_tfmodel':
+                used_layers = [
+                    ('conv1_1', 0.10),
+                    ('conv2_1', 0.15),
+                    ('conv3_1', 0.20),
+                    ('conv4_1', 0.25),
+                    ('conv5_1', 0.30)
+                ]
+
                 with open("data/vgg16.tfmodel", mode='rb') as f:
                     file_content = f.read()
                 graph_def = tf.GraphDef()
