@@ -74,12 +74,12 @@ with tf.device('/gpu:0'):
 
             # result = conv(result_conv3, 3, 1, 1, name='gen_final', activation=activation)
 
-            single_noise = tf.placeholder("float", shape=[1,28,28, 3])
-            transp_1_1 = conv_transpose(single_noise, 8, 3, 2, name='gen_transp1_1')
-            transp_1_2 = conv_transpose(transp_1_1, 16, 3, 2, name='gen_transp1_2')
-            transp_1_3 = conv_transpose(transp_1_2, 16, 3, 2, name='gen_transp1_3')
-            conv1_1 = conv(transp_1_3, 16, 3, 1, name='gen_conv1_1')
-            conv1_2 = conv(conv1_1, 16, 3, 1, name='gen_conv1_2')
+            single_noise = tf.placeholder("float", shape=[1, 28, 28, 32])
+            transp_1_1 = conv_transpose(single_noise, 16, 3, 2, name='gen_transp1_1')
+            transp_1_2 = conv_transpose(transp_1_1, 8, 3, 2, name='gen_transp1_2')
+            transp_1_3 = conv_transpose(transp_1_2, 8, 3, 2, name='gen_transp1_3')
+            conv1_1 = conv(transp_1_3, 8, 3, 1, name='gen_conv1_1')
+            conv1_2 = conv(conv1_1, 8, 3, 1, name='gen_conv1_2')
             # conv2_1 = conv(conv1_2, 16, 3, 1, name='gen_conv2_1')
             # conv2_2 = conv(conv2_1, 16, 3, 1, name='gen_conv2_2')
             result = conv(conv1_2, 3, 1, 1, name='gen_final')
@@ -207,7 +207,7 @@ with tf.device('/gpu:0'):
                 # feed={}
                 # for index, layer in enumerate(init_noise):
                 #     feed[layer] = batch[index]
-                feed={single_noise: np.random.rand(1, 28, 28, 3)}
+                feed={single_noise: np.random.rand(1, 28, 28, 32)}
         
                 train_step.run(session=sess, feed_dict=feed)
                 summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
