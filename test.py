@@ -204,7 +204,7 @@ with tf.device('/gpu:0'):
                 # feed={}
                 # for index, layer in enumerate(init_noise):
                 #     feed[layer] = batch[index]
-                feed={single_noise: np.random.rand(1, 224, 224, 3)}
+                feed={single_noise: np.random.rand(1, 224, 224, 16)}
         
                 train_step.run(session=sess, feed_dict=feed)
                 summary, loss_value = sess.run([summary_op, total_loss], feed_dict=feed)
