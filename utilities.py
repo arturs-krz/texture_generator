@@ -98,7 +98,8 @@ def conv_transpose(input, num_filters, filter_size, stride_len, name='conv_trans
 
         tf.summary.histogram('transpose_output', output)
 
-        return tf.nn.relu(output)
+        return leaky_relu(output, 0.01)
+        # return tf.nn.relu(output)
 
 def instance_norm(input):
     input_shape = input.get_shape().as_list()
