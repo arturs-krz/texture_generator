@@ -68,9 +68,9 @@ with tf.device('/gpu:0'):
                 current_channels += 8
                 current_aggregate = join_resolutions(low_conv3, high_conv3)
                 
-            result_conv1 = conv(current_aggregate, 3, 3, 1, name='gen_result_1', activation=activation)
-            result_conv2 = conv(result_conv1, 3, 3, 1, name='gen_result_2', activation=activation)
-            result_conv3 = conv(result_conv2, 3, 1, 1, name='gen_result_3', activation=activation)
+            result_conv1 = conv(current_aggregate, current_channels, 3, 1, name='gen_result_1', activation=activation)
+            result_conv2 = conv(result_conv1, current_channels, 3, 1, name='gen_result_2', activation=activation)
+            result_conv3 = conv(result_conv2, current_channels, 1, 1, name='gen_result_3', activation=activation)
 
             result = conv(result_conv3, 3, 1, 1, name='gen_final', activation=activation)
             print('Result shape: ', result.get_shape())
