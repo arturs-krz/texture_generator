@@ -4,6 +4,7 @@ import tensorflow as tf
 import os.path
 import os
 import sys, getopt
+import time
 
 import vgg16
 import extreme_net
@@ -207,6 +208,8 @@ with tf.device('/gpu:0'):
                 os.makedirs("./output/{}/".format(image_name))
 
             print("Batch size: {}".format(batch_size))
+            start = time.time()
+            print("Timer started...")
             for i in range(iterations):
                 
                 batch = [
@@ -231,6 +234,9 @@ with tf.device('/gpu:0'):
                     img = np.clip(np.array(img) * 255.0, 0, 255).astype('uint8')
                     skimage.io.imsave("output/{}/iteration-{}.jpeg".format(image_name, i + savediff), img)
 
+            end = time.time()
+            total_time = end - start
+            print("Total time: {}, average per iteration: {}".format(total_time, total_time/iterations))
             saver.save(sess, "data/model_{}.ckpt".format(image_name))
             
             img = result.eval(session=sess, feed_dict=feed)[0,:,:,:].reshape((224, 224, 3))
